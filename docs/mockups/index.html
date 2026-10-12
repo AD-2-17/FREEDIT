@@ -289,6 +289,14 @@
 
   .receipt { width: 600px; margin: 0 auto; padding: 48px 0 56px; }
 
+  .role-opt { border: 1px solid var(--line-strong); border-radius: 14px; padding: 18px; display: grid; gap: 8px; background: var(--panel); }
+  .role-opt.on { border-color: var(--text); box-shadow: 0 0 0 1px var(--text); }
+  .role-opt b { font-size: 16px; font-weight: 600; letter-spacing: -.01em; margin-top: 6px; }
+  .role-opt p { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+  .role-list { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 4px; font-size: 12px; color: var(--text-2); }
+  .role-list span::before { content: "✓ "; color: var(--ok); }
+  .radio { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--line-strong); }
+  .radio.on { border: 5px solid var(--text); }
   .swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
   .sw { font-size: 12px; color: var(--muted); }
   .sw i { display: block; height: 44px; border-radius: 8px; border: 1px solid var(--line); margin-bottom: 6px; }
@@ -330,7 +338,7 @@
 <div class="doc">
   <header class="doc-head">
     <div>
-      <h1>Freedit page designs · v3</h1>
+      <h1>Freedit page designs · v4</h1>
       <p>All 8 screens, in both themes. Use the switch on the right (or the sun / moon button inside any screen) to compare light and dark. In a small window the screens shrink to fit; they're designed for a laptop-width browser. Names and amounts are demo data; the wallet addresses are your real demo Editor and Client wallets, and the contract is the one live on Arc Testnet.</p>
     </div>
     <div class="seg" role="group" aria-label="Theme">
@@ -344,6 +352,7 @@
     <div class="doc-box">
       <h3>What changed</h3>
       <ul>
+        <li><svg class="i sm ok"><use href="#i-check"/></svg><span><b>v4 (for approval):</b> screens 8–10. Choose client or editor after connecting; the client can start a project with a request link, and the editor accepts it. No contract change.</span></li>
         <li><svg class="i sm ok"><use href="#i-check"/></svg><span><b>v3:</b> the landing page (screen 1) is now an editorial, story-style page inspired by heldby, with Freedit's own colour, timeline graphic and copy. Screens 2–7 stay clean and compact for daily use.</span></li>
         <li><svg class="i sm ok"><use href="#i-check"/></svg>Light and dark themes. The app follows your device setting, with a switch in the top bar.</li>
         <li><svg class="i sm ok"><use href="#i-check"/></svg>One typeface (Geist), one accent (blue), black or white main buttons, line icons. No gradients, glows or blur.</li>
@@ -365,7 +374,7 @@
   </div>
 
   <nav class="toc">
-    <a href="#foundations"><b>0</b>Foundations</a><a href="#landing"><b>1</b>Landing</a><a href="#dashboard"><b>2</b>Dashboard</a><a href="#new"><b>3</b>New project</a><a href="#upload"><b>4</b>Upload version</a><a href="#review"><b>5</b>Client review</a><a href="#pay"><b>5b</b>Pay</a><a href="#unlock"><b>6</b>Unlock</a><a href="#receipt"><b>7</b>Public receipt</a>
+    <a href="#foundations"><b>0</b>Foundations</a><a href="#landing"><b>1</b>Landing</a><a href="#dashboard"><b>2</b>Dashboard</a><a href="#new"><b>3</b>New project</a><a href="#upload"><b>4</b>Upload version</a><a href="#review"><b>5</b>Client review</a><a href="#pay"><b>5b</b>Pay</a><a href="#unlock"><b>6</b>Unlock</a><a href="#receipt"><b>7</b>Public receipt</a><a href="#role"><b>8</b>Choose role</a><a href="#request"><b>9</b>Request (client)</a><a href="#accept"><b>10</b>Accept (editor)</a>
   </nav>
 
   <!-- 0 FOUNDATIONS -->
@@ -897,6 +906,139 @@
       <div><b>No sign-in needed.</b> Shareable as a link; works for any Freedit payment. This is the page the landing page and the DoraHacks submission link to.</div>
     </div>
   </section>
+  <!-- 8 CHOOSE ROLE -->
+  <section class="frame" id="role">
+    <div class="frame-head"><h2>8 · Choose your role</h2><span class="route">/start · shown once after the first connect</span></div>
+    <div class="screen"><div class="screen-inner">
+      <div class="appbar">
+        <span class="brand"><span class="mark"><svg viewBox="0 0 10 10"><path d="M1.5 1v8l7-4z"/></svg></span>Freedit</span>
+        <span class="row g12">
+          <span class="net"><i class="dot" style="--c:var(--ok)"></i>Arc Testnet</span>
+          <button type="button" class="iconbtn" data-theme-flip aria-label="Switch theme"><svg class="i sm ic-moon"><use href="#i-moon"/></svg><svg class="i sm ic-sun"><use href="#i-sun"/></svg></button>
+          <span class="chip"><span class="av">2C</span><span class="addr" style="color:var(--text)">0x2C1c…86De</span></span>
+        </span>
+      </div>
+      <div style="max-width:720px; margin:0 auto; padding:56px 24px 64px">
+        <h1 class="title" style="font-size:28px; letter-spacing:-.03em">How will you use Freedit?</h1>
+        <div class="sub" style="font-size:14px; margin-bottom:24px">You can switch anytime from the top bar. One wallet can be both.</div>
+        <div class="grid2">
+          <div class="role-opt on">
+            <div class="between"><span class="pic"><svg class="i"><use href="#i-users"/></svg></span><span class="radio on"></span></div>
+            <b>I'm hiring an editor</b>
+            <p>Send a project request, watch each version, and pay only when you approve the final cut.</p>
+            <div class="role-list"><span>Request a project</span><span>Review versions</span><span>Approve &amp; pay</span></div>
+          </div>
+          <div class="role-opt">
+            <div class="between"><span class="pic"><svg class="i"><use href="#i-film"/></svg></span><span class="radio"></span></div>
+            <b>I'm an editor</b>
+            <p>Set your price and free revisions, upload versions, and get paid for extra revisions on the spot.</p>
+            <div class="role-list"><span>Create or accept projects</span><span>Upload versions</span><span>Get paid</span></div>
+          </div>
+        </div>
+        <div class="row" style="margin-top:24px; justify-content:space-between">
+          <span class="muted" style="font-size:12.5px">This only changes what you see first. Who can pay is decided by the contract, not this choice.</span>
+          <span class="btn primary lg">Continue as client</span>
+        </div>
+      </div>
+    </div></div>
+    <div class="notes">
+      <div><b>Role switch:</b> after this, the top bar shows a small <span class="mono">Client | Editor</span> switch. Client mode: the dashboard lists projects you pay for, shows "Spent", and the main button is <b>Request a project</b>. Editor mode: projects you edit, "Earned", and <b>New project</b>.</div>
+      <div><b>Safety:</b> the role is a view preference saved per wallet in this browser. On any project page the app still decides by wallet: only the client's wallet sees "Approve &amp; pay", and the contract rejects payments from anyone else. <span class="annot">Skipped if you open a request or project link: the link already says who you are.</span></div>
+    </div>
+  </section>
+
+  <!-- 9 CLIENT: REQUEST A PROJECT -->
+  <section class="frame" id="request">
+    <div class="frame-head"><h2>9 · Request a project (client)</h2><span class="route">/request</span></div>
+    <div class="screen"><div class="screen-inner">
+      <div class="appbar">
+        <span class="crumbs"><span class="brand"><span class="mark"><svg viewBox="0 0 10 10"><path d="M1.5 1v8l7-4z"/></svg></span>Freedit</span><span class="sep">/</span>Projects<span class="sep">/</span><span class="here">Request a project</span></span>
+        <span class="row g12">
+          <span class="seg" aria-label="Role"><span class="on">Client</span><span>Editor</span></span>
+          <button type="button" class="iconbtn" data-theme-flip aria-label="Switch theme"><svg class="i sm ic-moon"><use href="#i-moon"/></svg><svg class="i sm ic-sun"><use href="#i-sun"/></svg></button>
+          <span class="chip"><span class="av">BR</span>Bramble &amp; Rye <span class="addr">0x2C1c…86De</span></span>
+        </span>
+      </div>
+      <div class="split">
+        <div class="form">
+          <div><h1 class="title">Request a project</h1><div class="sub">Describe the job and propose terms. Nothing is charged now. You pay only when you approve the final cut.</div></div>
+          <div><span class="label">Project title</span><div class="field">Diwali launch reel · 45 s</div></div>
+          <div class="grid2">
+            <div><span class="label">Your wallet</span><div class="field mono" style="background:var(--sunken)">0x2C1c06E6…5986De</div><div class="help">This wallet pays. It's the one you're connected with.</div></div>
+            <div><span class="label">Your name</span><div class="field">Bramble &amp; Rye</div><div class="help">Shown to the editor.</div></div>
+          </div>
+          <div><span class="label">Editor's wallet <span class="faint" style="font-weight:400">· optional</span></span><div class="field mono">0xa8AeBCFB34a669BFF1127D10f97C36C5d992fB8B</div><div class="help ok"><svg class="i xs"><use href="#i-check"/></svg>Only this editor can accept. Leave it empty to send the link to any editor.</div></div>
+          <div class="grid3">
+            <div><span class="label">Budget</span><div class="field num">200.00<span class="suffix">USDC</span></div><div class="help">Paid when you approve.</div></div>
+            <div><span class="label">Free revisions</span><div class="field stepper"><span class="sbtn"><svg class="i sm"><use href="#i-minus"/></svg></span><span class="num">1</span><span class="sbtn"><svg class="i sm"><use href="#i-plus"/></svg></span></div><div class="help">Included in the budget.</div></div>
+            <div><span class="label">Fee per extra revision</span><div class="field num">15.00<span class="suffix">USDC</span></div><div class="help">Paid when you ask.</div></div>
+          </div>
+          <div><span class="label">Brief</span><div class="field" style="height:auto; padding:10px 12px; align-items:flex-start; min-height:76px">45-second Diwali launch reel for Instagram, 9:16. Footage and logo in the shared folder. Upbeat music, brand colours.</div></div>
+        </div>
+        <div style="display:grid; gap:16px; align-content:start">
+          <div class="card" style="padding:20px">
+            <div class="over" style="margin-bottom:10px">Summary</div>
+            <div style="font-size:15.5px; font-weight:500; line-height:1.5; margin-bottom:16px">You pay <b>$200.00</b> when you approve the final cut. The first revision is free, then <b>$15.00</b> each.</div>
+            <dl class="kv" style="margin-bottom:18px">
+              <dt>Charged now</dt><dd class="strong">$0.00</dd>
+              <dt>Paid to</dt><dd>The editor, directly</dd>
+              <dt>Freedit fee</dt><dd>$0.00</dd>
+            </dl>
+            <span class="btn primary lg block">Create request link</span>
+            <div class="help" style="justify-content:center; margin-top:10px">No wallet prompt. Nothing goes on-chain until the editor accepts.</div>
+          </div>
+          <div class="card" style="padding:16px; border-color:var(--accent)">
+            <div class="row" style="font-size:13px"><svg class="i sm ok"><use href="#i-check"/></svg><b style="font-weight:500">Request link ready</b></div>
+            <div class="field mono" style="margin:10px 0 8px; background:var(--sunken)"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap">freedit.app/accept?t=Diwali+launch+reel…</span><span class="copy" style="margin-left:auto"><svg class="i xs"><use href="#i-copy"/></svg></span></div>
+            <div class="muted" style="font-size:12.5px">Send it to your editor (WhatsApp, email…). When they accept, the project appears in your Projects and you'll review V1 there.</div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <div class="notes">
+      <div><b>What's new:</b> the client can start the job. The form mirrors the editor's New project page, so both sides use the same words: budget, free revisions, fee per extra revision.</div>
+      <div><b>How the link works:</b> for now the terms travel inside the link (no account or server needed). Phase 4 stores requests in Supabase, so they also show up in the editor's dashboard. <span class="annot">After the editor accepts, this card turns into "Accepted by 0xa8Ae…fB8B · open project".</span></div>
+    </div>
+  </section>
+
+  <!-- 10 EDITOR: ACCEPT -->
+  <section class="frame" id="accept">
+    <div class="frame-head"><h2>10 · Accept a request (editor)</h2><span class="route">/accept?…</span></div>
+    <div class="screen"><div class="screen-inner">
+      <div class="appbar">
+        <span class="crumbs"><span class="brand"><span class="mark"><svg viewBox="0 0 10 10"><path d="M1.5 1v8l7-4z"/></svg></span>Freedit</span><span class="sep">/</span><span class="here">Project request</span></span>
+        <span class="row g12">
+          <span class="seg" aria-label="Role"><span>Client</span><span class="on">Editor</span></span>
+          <button type="button" class="iconbtn" data-theme-flip aria-label="Switch theme"><svg class="i sm ic-moon"><use href="#i-moon"/></svg><svg class="i sm ic-sun"><use href="#i-sun"/></svg></button>
+          <span class="chip"><span class="av">KM</span>Kavya Menon <span class="addr">0xa8Ae…fB8B</span></span>
+        </span>
+      </div>
+      <div style="max-width:600px; margin:0 auto; padding:44px 24px 56px">
+        <div class="over">Project request</div>
+        <h1 class="title" style="font-size:26px; letter-spacing:-.03em; margin-top:6px">Bramble &amp; Rye invites you to edit</h1>
+        <div style="font-size:17px; font-weight:500; margin-top:2px">Diwali launch reel · 45 s</div>
+        <div class="req" style="margin:18px 0 20px; font-size:13.5px; color:var(--text-2)">45-second Diwali launch reel for Instagram, 9:16. Footage and logo in the shared folder. Upbeat music, brand colours.</div>
+        <div class="card" style="padding:16px 18px; margin-bottom:18px">
+          <dl class="kv" style="grid-template-columns:170px 1fr">
+            <dt>Budget</dt><dd><b class="num">$200.00 USDC</b> <span class="muted">· paid to you when they approve</span></dd>
+            <dt>Free revisions</dt><dd>1</dd>
+            <dt>Each extra revision</dt><dd><b class="num">$15.00</b> <span class="muted">· paid to you when they ask</span></dd>
+            <dt>Client wallet</dt><dd class="addr">0x2C1c…86De</dd>
+            <dt>Sent to</dt><dd class="row ok" style="gap:6px"><svg class="i xs"><use href="#i-check"/></svg>your wallet 0xa8Ae…fB8B</dd>
+          </dl>
+        </div>
+        <span class="btn primary lg block">Accept &amp; create project</span>
+        <div class="help" style="justify-content:center; margin-top:10px">One wallet confirmation · network fee under $0.01. You upload V1 next.</div>
+        <div class="row" style="justify-content:center; margin-top:14px; font-size:13px"><a class="link">Propose different terms</a></div>
+        <div class="row muted" style="justify-content:center; font-size:12px; margin-top:22px"><svg class="i xs"><use href="#i-shield"/></svg>Freedit never holds money. The client pays you directly when they approve.</div>
+      </div>
+    </div></div>
+    <div class="notes">
+      <div><b>On accept:</b> the editor's wallet signs <span class="mono">createProject(client, price, freeRevisions, fee)</span> with the client's terms, which is exactly what "New project" does today, so <b>no contract change and no redeploy</b>. The project then shows up in both dashboards automatically.</div>
+      <div><b>Edge cases:</b> wrong wallet connected → "This request was sent to 0xa8Ae…fB8B. Switch wallets to accept." · "Propose different terms" opens New project pre-filled; the client sees the final terms on the project page before paying anything. <span class="annot">If the client opens their own link, it shows "Waiting for the editor to accept".</span></div>
+    </div>
+  </section>
+
 </div>
 
 <script>

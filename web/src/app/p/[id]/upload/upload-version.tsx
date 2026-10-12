@@ -30,7 +30,7 @@ export function UploadVersion({ idText }: { idText: string }) {
   const project = useProject(id);
   const p = project.data as Project | undefined;
   const meta = useProjectMeta(id);
-  const activity = useActivity(id, p ? `${p.version}-${p.revisionsUsed}-${p.paid}` : undefined);
+  const activity = useActivity(id, p ? { versions: p.version, revisions: p.revisionsUsed, paid: p.paid } : undefined);
   const fileInput = useRef<HTMLInputElement>(null);
 
   const [file, setFile] = useState<File>();
@@ -104,6 +104,13 @@ export function UploadVersion({ idText }: { idText: string }) {
                 { label: "Record on Arc", state: hash && previewOk ? "now" : "todo" },
               ]} />
             </div>
+
+            {isEditor && p.version === 0 && (
+              <Notice tone="ok">
+                Project #{id.toString()} is created and already on {meta.clientName || "your client"}&apos;s dashboard. They&apos;ll see V1 as soon as you submit it.
+                After that, the project page has a link you can send them.
+              </Notice>
+            )}
 
             {!isEditor && <Notice tone="warn">{address ? "Only the editor's wallet can upload versions for this project." : "Connect the editor's wallet (top right) to upload."}</Notice>}
 

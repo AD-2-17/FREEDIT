@@ -28,6 +28,7 @@ export function NewProject() {
   const config = useConfig();
   const { address, chainId, isConnected } = useConnection();
   const [title, setTitle] = useState("");
+  const [editorName, setEditorName] = useState("");
   const [client, setClient] = useState("");
   const [clientName, setClientName] = useState("");
   const [price, setPrice] = useState("");
@@ -65,7 +66,11 @@ export function NewProject() {
         .find((ev) => ev?.eventName === "ProjectCreated");
       const id = created && created.eventName === "ProjectCreated" ? created.args.id : undefined;
       if (id === undefined) throw new Error("Project created, but its number wasn't found. Open your dashboard to see it.");
-      saveProjectMeta(id, { title: title.trim() || undefined, clientName: clientName.trim() || undefined });
+      saveProjectMeta(id, {
+        title: title.trim() || undefined,
+        clientName: clientName.trim() || undefined,
+        editorName: editorName.trim() || undefined,
+      });
       router.push(`/p/${id}/upload`);
     } catch (e) {
       setError(explainError(e));
@@ -81,9 +86,16 @@ export function NewProject() {
       <div className="form">
         <div><h1 className="title">New project</h1><div className="sub">Set the terms once. Your client sees exactly these, and they can&apos;t be changed later.</div></div>
 
-        <div>
-          <label className="label" htmlFor="title">Project title</label>
-          <div className="field"><input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Diwali launch reel · 45 s" maxLength={80} /></div>
+        <div className="grid2">
+          <div>
+            <label className="label" htmlFor="title">Project title</label>
+            <div className="field"><input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Diwali launch reel · 45 s" maxLength={80} /></div>
+          </div>
+          <div>
+            <label className="label" htmlFor="editorName">Your name</label>
+            <div className="field"><input id="editorName" value={editorName} onChange={(e) => setEditorName(e.target.value)} placeholder="Kavya Menon" maxLength={60} /></div>
+            <div className="help">Your client sees this instead of your wallet address.</div>
+          </div>
         </div>
 
         <div className="grid2">
@@ -93,7 +105,7 @@ export function NewProject() {
               <input id="client" className="mono" value={client} onChange={(e) => setClient(e.target.value)} placeholder="0x…" spellCheck={false} autoComplete="off" aria-invalid={!!show(clientError)} aria-describedby="client-help" />
             </div>
             <div id="client-help" className={`help ${show(clientError) ? "bad" : !clientError ? "ok" : ""}`}>
-              {show(clientError) ? clientError : !clientError ? <><Icon name="check" size="xs" />Valid address, not your own</> : "The wallet your client will pay from."}
+              {show(clientError) ? clientError : !clientError ? <><Icon name="check" size="xs" />Valid address, not your own</> : "The wallet your client pays from. The project appears on their dashboard automatically."}
             </div>
           </div>
           <div>

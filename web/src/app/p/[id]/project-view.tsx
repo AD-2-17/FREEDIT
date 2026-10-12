@@ -7,10 +7,10 @@ import { useConnection } from "wagmi";
 import { AppBar } from "@/components/app-bar";
 import { FileCheck } from "@/components/file-check";
 import { Icon } from "@/components/icon";
-import { CopyButton, Notice, RevisionMeter, Status, Steps, TxLink, type Step } from "@/components/ui";
+import { CopyButton, CopyLinkButton, Notice, RevisionMeter, Status, Steps, TxLink, type Step } from "@/components/ui";
 import { useActivity, type ActivityItem } from "@/lib/activity";
 import { dateTime, shortAddress, shortHash, usd } from "@/lib/format";
-import { projectTitle, useNote, useProjectMeta } from "@/lib/meta";
+import { importMetaFromUrl, projectTitle, shareLink, useNote, useProjectMeta } from "@/lib/meta";
 import { network } from "@/lib/network";
 import {
   earned, freeditAddress, nextRevisionCost, paidRevisions, parseId, statusOf, useProject, useVersions,
@@ -26,12 +26,14 @@ export function ProjectView({ idText }: { idText: string }) {
   const p = project.data as Project | undefined;
   const versions = useVersions(id, p?.version ?? 0);
   const meta = useProjectMeta(id);
-  const activity = useActivity(id, p ? `${p.version}-${p.revisionsUsed}-${p.paid}` : undefined);
+  const activity = useActivity(id, p ? { versions: p.version, revisions: p.revisionsUsed, paid: p.paid } : undefined);
   const [view, setView] = useState<number>();
   const [sheet, setSheet] = useState<"pay" | "changes" | null>(null);
   const [paidTx, setPaidTx] = useState<Hash>();
   const [origin, setOrigin] = useState("");
   useEffect(() => setOrigin(window.location.origin), []);
+  // Opened from a share link: keep the title and names it carries (display only; money facts come from the chain).
+  useEffect(() => { if (id) importMetaFromUrl(id); }, [id]);
 
   const title = id ? projectTitle(id, meta) : "Project";
   const crumbs = [{ label: "Projects", href: "/dashboard" }, { label: title }];
@@ -127,18 +129,24 @@ export function ProjectView({ idText }: { idText: string }) {
               )}
             </div>
           ) : role === "editor" ? (
-            <div className="side-sec" style={{ display: "grid", gap: 12 }}>
-              <div className="over">Your project</div>
-              <Link href={`/p/${id}/upload`} className={`btn lg block ${status.key === "review" ? "" : "primary"}`}><Icon name="upload" size="sm" />Upload V{p.version + 1}</Link>
-              {status.key === "review" && <div className="help" style={{ margin: 0 }}>The client is reviewing V{p.version}. A new version replaces it.</div>}
-              <div className="card" style={{ padding: 12 }}>
-                <div className="label" style={{ marginBottom: 4 }}>Send your client this page</div>
-                <div className="row" style={{ justifyContent: "space-between" }}>
-                  <span className="mono muted" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>/p/{id.toString()}</span>
-                  <CopyButton value={`${origin}/p/${id}`} label="Copy link" />
-                </div>
+            <>
+              <div className="side-sec" style={{ display: "grid", gap: 12 }}>
+                <div className="over">Your project</div>
+                <Link href={`/p/${id}/upload`} className={`btn lg block ${status.key === "review" ? "" : "primary"}`}><Icon name="upload" size="sm" />Upload V{p.version + 1}</Link>
+                {status.key === "review" && <div className="help" style={{ margin: 0 }}>The client is reviewing V{p.version}. A new version replaces it.</div>}
               </div>
-            </div>
+              <div className="side-sec" style={{ display: "grid", gap: 10 }}>
+                <div className="over">Share with your client</div>
+                <div className="t2" style={{ fontSize: 13, lineHeight: 1.5 }}>
+                  It&apos;s already on {meta.clientName || "your client"}&apos;s dashboard: when they connect <span className="addr">{shortAddress(p.client)}</span> on Freedit, they see it.
+                  This link takes them straight here{meta.title || meta.clientName || meta.editorName ? ", with the title and names" : ""}.
+                </div>
+                <div className="field mono" style={{ background: "var(--sunken)", fontSize: 12 }}>
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{origin ? shareLink(origin, id, meta) : `/p/${id}`}</span>
+                </div>
+                <CopyLinkButton value={origin ? shareLink(origin, id, meta) : ""} label="Copy link for your client" />
+              </div>
+            </>
           ) : (
             <div className="side-sec" style={{ display: "grid", gap: 12 }}>
               <div className="between"><span className="over">Price</span><span className="strong num">{usd(p.price)} USDC</span></div>

@@ -29,6 +29,9 @@ _Last updated: 2026-10-12. **Phases 1–3 are done**: contract tested, deployed 
   - **Tested end to end on a local arc-anvil fork of testnet** with two test wallets: create → V1 → free revision → V2 → paid $15 revision (allowance + fee) → V3 → approve & pay $200 (allowance + pay) → receipt. On-chain after: contract $0.00, editor +$215.00, client −$215.00, leftover allowance 0, dashboards show Earned $215.00. Fingerprint: app's chunked SHA-256 = WebCrypto on a 20 MB file; "check a file" accepts V3, rejects V2. Old-version view disables Approve (D4 in the UI).
   - Found and fixed while testing: explorer API rate-limits (429), so activity loads once per state change, never on a timer; reverts aren't retried; "doesn't exist" message for unknown projects; app-bar overlap on narrow screens; dev test wallets excluded from builds when `NEXT_PUBLIC_ARC_NETWORK` is set.
 
+- **10-12 Sharing with the client** (after your question): New project has "Your name"; the project page has a "Share with your client" card with a link carrying the title and both names; Upload V1 confirms the project is already on the client's dashboard; client-only wallets see "Paid to editors / Waiting on the editor". Fixed: the activity list could miss an event the explorer hadn't indexed yet (now re-checks while it's behind the contract). Demoed on the local fork: the client's dashboard lists the project with no link at all; opening the link adds the labels.
+- **10-12 Mockup v4 (screens 8–10, for approval):** choose client/editor after connecting; the client can request a project with a link; the editor accepts it. No contract change.
+
 ## Next
 1. **YOU: Phase 3 check on testnet with your real wallets** (steps below, about 15 min).
 2. Phase 4: Supabase (preview + final file upload, private download after `isPaid`, titles/notes shared between both sides) + Vercel deploy. Needs B12/B13 accounts.

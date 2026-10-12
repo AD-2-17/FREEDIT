@@ -54,9 +54,10 @@ async function fetchActivity(id: bigint, client: ReturnType<typeof usePublicClie
     raws = Array.isArray(json.result) ? json.result : [];
   } else {
     if (!client) return [];
-    const latest = await client.getBlockNumber();
+    // cacheTime 0: viem otherwise reuses the block number for a few seconds and misses a block mined just now.
+    const latest = await client.getBlockNumber({ cacheTime: 0 });
     const from = latest > 9_999n ? latest - 9_999n : 0n;
-    const logs = (await client.getLogs({ address, fromBlock: from > network.deployBlock ? from : network.deployBlock, toBlock: latest })) as Log[];
+    const logs = (await client.getLogs({ address, fromBlock: from > network.deployBlock ? from : network.deployBlock, toBlock: "latest" })) as Log[];
     raws = logs.filter((l) => l.topics[1] === pad(toHex(id))).map((l) => ({
       topics: l.topics as Hex[],
       data: l.data,
@@ -77,20 +78,33 @@ async function fetchActivity(id: bigint, client: ReturnType<typeof usePublicClie
     .sort((a, b) => (a.blockNumber === b.blockNumber ? a.logIndex - b.logIndex : a.blockNumber < b.blockNumber ? -1 : 1));
 }
 
+/** What the contract says has happened, used to tell whether the event list has caught up. */
+export type Expected = { versions: number; revisions: number; paid: boolean };
+
+function caughtUp(items: ActivityItem[], e: Expected) {
+  const versions = items.filter((a) => a.kind === "version").length;
+  const revisions = items.filter((a) => a.kind === "revision").length;
+  return versions >= e.versions && revisions >= e.revisions && (!e.paid || items.some((a) => a.kind === "paid"));
+}
+
 /**
- * Fetched once per page view, then again only when `stateKey` changes (new version, revision or payment,
- * which the 8 s contract poll notices). The explorer API rate-limits (429 seen on 10-12), so no interval polling.
- * Pass `stateKey` undefined until the project has loaded, so missing projects never hit the explorer.
+ * Fetched once per page view and again whenever the contract state changes (the 8 s contract poll notices).
+ * The explorer indexes a few seconds behind the chain, so while the list is behind the contract state it
+ * re-checks every 5 s, at most 12 times. No other polling: the explorer API rate-limits (429 seen on 10-12).
+ * Pass `expected` undefined until the project has loaded, so missing projects never hit the explorer.
  */
-export function useActivity(id: bigint | undefined, stateKey: string | undefined) {
+export function useActivity(id: bigint | undefined, expected: Expected | undefined) {
   const client = usePublicClient();
+  const stateKey = expected && `${expected.versions}-${expected.revisions}-${expected.paid}`;
   return useQuery({
     queryKey: ["activity", chain.id, id?.toString(), stateKey],
     queryFn: () => fetchActivity(id!, client),
-    enabled: !!id && !!network.freedit && stateKey !== undefined,
+    enabled: !!id && !!network.freedit && !!expected,
     staleTime: 60_000,
     refetchOnWindowFocus: false,
     placeholderData: (previous) => previous,
+    refetchInterval: (q) =>
+      expected && q.state.data && !caughtUp(q.state.data, expected) && q.state.dataUpdateCount < 12 ? 5_000 : false,
     retry: 2,
     retryDelay: (attempt) => 2_000 * 2 ** attempt,
   });

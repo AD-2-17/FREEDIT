@@ -60,3 +60,36 @@ export const useNote = (hash: string | undefined) => useStored<string>(hash ? nK
 
 /** Title to show when no label is stored. */
 export const projectTitle = (id: bigint, meta: ProjectMeta) => meta.title?.trim() || `Project #${id}`;
+
+/** Display-only text from a link: no control characters, trimmed, capped. */
+const clean = (s: string | null) => (s ?? "").replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 80) || undefined;
+
+const LINK_KEYS = { t: "title", c: "clientName", e: "editorName" } as const;
+
+/**
+ * Link the editor sends to the client. The project is already on the client's dashboard (the contract
+ * indexes it by their wallet); the link goes straight to it and carries the labels so the client sees
+ * the title and names too. Phase 4 stores labels in Supabase and the extra parameters become unnecessary.
+ */
+export function shareLink(origin: string, id: bigint, meta: ProjectMeta): string {
+  const q = new URLSearchParams();
+  for (const [k, field] of Object.entries(LINK_KEYS)) {
+    const v = meta[field];
+    if (v) q.set(k, v);
+  }
+  const query = q.toString();
+  return `${origin}/p/${id}${query ? `?${query}` : ""}`;
+}
+
+/** On opening a share link: keep any labels this browser doesn't have yet, then tidy the address bar. */
+export function importMetaFromUrl(id: bigint) {
+  const params = new URLSearchParams(window.location.search);
+  const current = read<ProjectMeta>(pKey(id)) ?? {};
+  const incoming: ProjectMeta = {};
+  for (const [k, field] of Object.entries(LINK_KEYS)) {
+    const v = clean(params.get(k));
+    if (v && !current[field]) incoming[field] = v;
+  }
+  if (Object.keys(incoming).length) saveProjectMeta(id, incoming);
+  if ([...params.keys()].some((k) => k in LINK_KEYS)) window.history.replaceState(null, "", window.location.pathname);
+}

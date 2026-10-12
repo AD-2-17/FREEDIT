@@ -24,6 +24,26 @@ export function CopyButton({ value, label = "Copy" }: { value: string; label?: s
   );
 }
 
+/** Full-width "Copy link" button that confirms with "Copied". */
+export function CopyLinkButton({ value, label = "Copy link" }: { value: string; label?: string }) {
+  const [done, setDone] = useState(false);
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(value);
+      setDone(true);
+      setTimeout(() => setDone(false), 1500);
+    } catch {
+      // clipboard blocked: the link is shown above the button, so it can be copied by hand
+    }
+  }
+  return (
+    <button type="button" className="btn block" onClick={copy} disabled={!value}>
+      <Icon name={done ? "check" : "copy"} size="sm" className={done ? "ok" : ""} />
+      {done ? "Copied" : label}
+    </button>
+  );
+}
+
 /** 0x1234…abcd with a copy button and, optionally, a link to the explorer. */
 export function Address({ address, link = false }: { address: string; link?: boolean }) {
   return (

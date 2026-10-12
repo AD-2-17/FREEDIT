@@ -48,9 +48,14 @@ export function Dashboard() {
   }
 
   const mine = rows.filter((r) => r.role === "editor");
+  const theirs = rows.filter((r) => r.role === "client");
+  // A wallet that's only ever been a client sees client wording: what it paid, and what it's waiting on.
+  const clientOnly = mine.length === 0 && theirs.length > 0;
   const totalEarned = mine.reduce((sum, r) => sum + earned(r.p), 0n);
+  const totalPaid = theirs.reduce((sum, r) => sum + earned(r.p), 0n);
   const inProgress = rows.filter((r) => !r.p.paid).length;
   const waitingOnClient = mine.filter((r) => statusOf(r.p).key === "review").length;
+  const waitingOnEditor = theirs.filter((r) => ["draft", "changes"].includes(statusOf(r.p).key)).length;
   const waitingOnYou = rows.filter((r) => {
     const k = statusOf(r.p).key;
     return r.role === "editor" ? k === "changes" || k === "draft" : k === "review";
@@ -66,9 +71,9 @@ export function Dashboard() {
       </div>
 
       <div className="stats">
-        <div><div className="stat-k">Earned</div><div className="stat-v num">{usd(totalEarned)} <small>USDC</small></div></div>
+        <div><div className="stat-k">{clientOnly ? "Paid to editors" : "Earned"}</div><div className="stat-v num">{usd(clientOnly ? totalPaid : totalEarned)} <small>USDC</small></div></div>
         <div><div className="stat-k">In progress</div><div className="stat-v num">{inProgress}</div></div>
-        <div><div className="stat-k"><i className="dot" style={{ ["--c" as string]: "var(--accent)" }} />Waiting on client</div><div className="stat-v num">{waitingOnClient}</div></div>
+        <div><div className="stat-k"><i className="dot" style={{ ["--c" as string]: "var(--accent)" }} />{clientOnly ? "Waiting on the editor" : "Waiting on client"}</div><div className="stat-v num">{clientOnly ? waitingOnEditor : waitingOnClient}</div></div>
         <div><div className="stat-k"><i className="dot" style={{ ["--c" as string]: "var(--warn)" }} />Waiting on you</div><div className="stat-v num">{waitingOnYou}</div></div>
       </div>
 
@@ -92,7 +97,7 @@ export function Dashboard() {
         <div className="table-wrap">
           <table className="list">
             <thead>
-              <tr><th>Project</th><th>Status</th><th>Next step</th><th>Revisions</th><th className="r">Price</th><th className="r">Earned</th><th><span className="sr-only">Open</span></th></tr>
+              <tr><th>Project</th><th>Status</th><th>Next step</th><th>Revisions</th><th className="r">Price</th><th className="r">{clientOnly ? "Paid" : "Earned"}</th><th><span className="sr-only">Open</span></th></tr>
             </thead>
             <tbody>{shown.map((r) => <ProjectRow key={r.id.toString()} row={r} />)}</tbody>
           </table>
@@ -128,7 +133,7 @@ function ProjectRow({ row: { id, p, role } }: { row: Row }) {
       <td>{next}</td>
       <td><span className="row"><RevisionMeter free={p.freeRevisions} used={p.revisionsUsed} /><span className="muted">{p.revisionsUsed} used · {p.freeRevisions} free</span></span></td>
       <td className="r num">{usd(p.price)}</td>
-      <td className="r num">{role === "editor" ? usd(earned(p)) : <span className="faint">—</span>}</td>
+      <td className="r num">{usd(earned(p))}</td>
       <td className="faint"><Icon name="chev" size="sm" /></td>
     </tr>
   );
