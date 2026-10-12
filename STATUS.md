@@ -34,6 +34,9 @@ _Last updated: 2026-10-12. **Phases 1–3 are done**: contract tested, deployed 
 
 - **10-12 Phase 4 code (Supabase), waiting on keys:** `supabase/schema.sql` (tables, buckets, RLS); server API routes for Sign-In with Ethereum, labels, notes, uploads, downloads (`web/src/server`, `web/src/app/api`); upload page uploads both files with progress; paid page downloads, checks the fingerprint, then saves; notes and titles shared between both sides. Without Supabase keys the app keeps working the Phase 3 way. Checked: tsc, `next build`, 11/11 sign-in attack tests (after fixing a reusable-nonce bug), no server code or keys in browser bundles. `web/.env.local` created (gitignored) with a generated session secret; Supabase lines blank for you.
 
+- **10-12 Supabase project created** through the connector: `freedit`, ref `jqnajstukifkmictupnm`, region ap-south-1 (Mumbai), org "AD-2-17's Org", free plan ($0/month). Schema applied as migration `freedit_initial_schema`: 4 tables (RLS on, no policies), buckets `previews` (public) and `finals` (private), 50 MB each. Security advisor: only the expected INFO "RLS enabled, no policy" (intentional: server-only access). `SUPABASE_URL` written to `web/.env.local`; the service-role key is still blank (YOU).
+- **10-12 GitHub:** pushed to https://github.com/AD-2-17/FREEDIT (public, branch `main`). Full-history secret scan before pushing: clean. Commits keep your Gmail address (your choice).
+
 ## Next
 1. **YOU: Phase 3 check on testnet with your real wallets** (steps below, about 15 min).
 2. Phase 4: Supabase (preview + final file upload, private download after `isPaid`, titles/notes shared between both sides) + Vercel deploy. Needs B12/B13 accounts.
