@@ -86,18 +86,20 @@ export function explainError(e: unknown): string {
     const revert = e.walk((x) => x instanceof ContractFunctionRevertedError) as ContractFunctionRevertedError | null;
     const name = revert?.data?.errorName;
     if (name && reasons[name]) return reasons[name];
-    if (revert?.reason) return revert.reason === "Blocked address" ? "One of these wallets is blocked on Arc, so USDC can't move." : revert.reason;
-    if (/insufficient funds/i.test(e.message)) return "Not enough USDC for the network fee.";
     // This page's own call to Arc's RPC (simulation, receipt) got no usable answer.
     const http = e.walk((x) => x instanceof HttpRequestError || x instanceof TimeoutError);
     if (http) {
       const status = http instanceof HttpRequestError && http.status ? ` (HTTP ${http.status})` : "";
       return `Couldn't reach ${network.label} just now${status}. Nothing was sent. Check your connection and try again.`;
     }
-    // The wallet's own connection to the network failed (it uses the RPC URL saved in the wallet, not ours).
-    if (/rpc endpoint|failed to fetch|fetch failed|\bhttp (request|error|client)|status code/i.test(e.details ?? "")) {
-      return `Your wallet couldn't reach ${network.label}. In your wallet's network settings, check the RPC URL is ${chain.rpcUrls.default.http[0]}, then try again.`;
+    // The wallet answers code -32603 when its own RPC fails, and viem files that under "reverted" with the
+    // wallet's text as the reason. So read the text before trusting it as a revert reason.
+    const text = `${revert?.reason ?? ""} ${e.details ?? ""}`;
+    if (/insufficient funds/i.test(`${text} ${e.message}`)) return "Not enough USDC for the network fee.";
+    if (!name && /rpc endpoint|failed to fetch|fetch failed|\bhttp (request|error|client)|status code|gateway timeout/i.test(text)) {
+      return `Your wallet couldn't reach ${network.label}, so nothing was sent. In your wallet's network settings, check that ${network.label}'s RPC URL is ${chain.rpcUrls.default.http[0]}, then try again.`;
     }
+    if (revert?.reason) return revert.reason === "Blocked address" ? "One of these wallets is blocked on Arc, so USDC can't move." : revert.reason;
     return withDetail(e.shortMessage, e.details);
   }
   if (e instanceof Error) return e.message;
