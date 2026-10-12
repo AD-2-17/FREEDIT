@@ -15,12 +15,18 @@ const devConnectors =
       ]
     : [];
 
+/**
+ * Where the browser reads Arc: Arc's RPC directly, then this site's own /api/rpc relay. Some browsers block
+ * requests to every *.arc.io RPC ("Failed to fetch" on all providers, 10-12) but not to the site itself; the
+ * relay also falls back across the docs' node providers server-side. (No window during server rendering.)
+ */
+const readUrls = typeof window === "undefined" ? rpcUrls : [rpcUrls[0], `${window.location.origin}/api/rpc`];
+
 export const wagmiConfig = createConfig({
   chains: [chain],
   // injected() + EIP-6963 discovery covers MetaMask, Rabby and other browser wallets.
   connectors: [injected(), ...devConnectors],
-  // Reads go to Arc's RPC; if it fails (blocked, rate-limited, down), the docs' other node providers take over.
-  transports: { [chain.id]: fallback(rpcUrls.map((url) => http(url))) },
+  transports: { [chain.id]: fallback(readUrls.map((url) => http(url))) },
   ssr: true,
 });
 
