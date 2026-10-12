@@ -55,6 +55,7 @@ Docs MCP: `circle` (`https://api.circle.com/v1/codegen/mcp`, user scope) is conf
 | Blocklist revert reason in the EVM is `"Blocked address"` (the troubleshoot page's example shows "Blocklisted address"). The live RPC rejects such calls before execution: `-32603 Blocked address` | ✅ tested 10-12 | `arc-cast call --trace` on testnet |
 | Deploying Freedit: forge estimates 2.0M gas; **actual 1,552,079 gas × 32.5 gwei = $0.0504 USDC** (testnet, 10-12) | ✅ tested 10-12 | testnet deploy receipt |
 | Testnet contract verification: `--verifier blockscout --verifier-url https://explorer.testnet.arc.io/api/` | ✅ used 10-12: "Pass - Verified" after one 15 s retry | deploy-on-arc, our deploy |
+| `eth_getLogs` is capped at **10,000 blocks** per query (testnet and mainnet RPC: "requested range too large"); blocks ≈ 0.5 s | ✅ tested 10-12 | RPC probes |
 | Mainnet verification URL `https://explorer.arc.io/api/` | ⚠️ endpoint is live Blockscout (backend v11.3.3, `/api` answers like testnet); not yet used for a real verification | probed 10-12 |
 
 ## Contract design (`contracts/src/Freedit.sol`)
@@ -113,6 +114,12 @@ Git runs from Windows only (D2). `.gitattributes` pins LF so WSL and Windows agr
 - **D12 (10-11) Contract addresses are committed** in `web/src/config/deployments.ts` (they're public), not kept in env vars.
 - **D14 (10-12) `network = "arc"` in `foundry.toml`.** Arc Foundry only simulates Arc's precompiles with it, and the fork tests silently tested the wrong thing without it (see Arc facts). The blocklist fork test now matches the exact `"Blocked address"` reason instead of any revert. Never remove this line.
 - **D15 (10-12) `soldeer.lock` is committed.** It pins the dependency zips by checksum, so `soldeer install` is reproducible.
+- **D16 (10-12) Activity feed reads the explorer's Etherscan-style log API** (`/api?module=logs&action=getLogs&topic1=<id>`, CORS `*`). Arc RPC caps `eth_getLogs` at 10,000 blocks (~83 min at 0.5 s blocks), so scanning by RPC doesn't scale. The explorer rate-limits (429 seen), so activity is fetched once per page view and again only when contract state changes; if it fails, the feed falls back to versions from contract state. Totals ("Earned") come from state: price if paid + (used − free) × fee.
+- **D17 (10-12) `NEXT_PUBLIC_ARC_NETWORK=local`** = arc-anvil fork of testnet on 127.0.0.1:8545 with two wagmi `mock` wallets (anvil #2, #3; #1 is on Arc's test blocklist). For end-to-end testing without real keys. Always set the variable on real builds: that strips the test-wallet code.
+- **D18 (10-12) Exact pins, ≥ 14-day-old releases**, except Next 16.3.8 (security patch for 6 advisories in ≤ 16.3.7). No ESLint (not in the brief).
+- **D19 (10-12) Exact-amount USDC approvals** (price or fee), never unlimited. Pay = approve (skipped if enough) + `approveAndPay` with the hash of the version on screen; Approve is disabled unless the latest version is on screen.
+- **D20 (10-12) Phase 3 metadata in localStorage** (title, client name, notes); Phase 4 moves it to Supabase. Nothing money-related is ever read from it.
+- **D21 (10-12) viem's Arc Testnet chain points at `*.arc.network` / `testnet.arcscan.app`**; we override with the docs' `rpc.testnet.arc.io` / `explorer.testnet.arc.io` (both answer chain 5042002). Multicall3 `0xcA11…CA11` exists on both nets, so batched reads work.
 - **D13 (pending) Memo.** It needs no contract change, since CallFrom keeps the client EOA as `msg.sender`. Decide in Phase 5 whether the UI wraps pay/revision calls in `Memo.memo(...)` for EOAs (fallback: direct call).
 
 ## Design rules (strict)
