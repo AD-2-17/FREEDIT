@@ -78,7 +78,7 @@ Docs MCP: `circle` (`https://api.circle.com/v1/codegen/mcp`, user scope) is conf
 
 | Service | Where | Notes |
 |---|---|---|
-| Live site (Vercel, testnet) | https://freedit-one.vercel.app | Root Directory `web`; env set by the user; auto-deploys on push to `main` |
+| Live site (Vercel, testnet) | https://freedit-one.vercel.app | Root Directory `web`; env set by the user; auto-deploys on push to `main`. MetaMask flags all `*.vercel.app` as drainers (D25): custom domain pending |
 | GitHub | https://github.com/AD-2-17/FREEDIT | public, branch `main`; commits use the user's Gmail (their choice) |
 | Supabase | project `freedit`, ref `jqnajstukifkmictupnm`, ap-south-1, free plan | schema = migration `freedit_initial_schema` (= `supabase/schema.sql`); Supabase connector available in Claude sessions |
 
@@ -129,6 +129,9 @@ Git runs from Windows only (D2). `.gitattributes` pins LF so WSL and Windows agr
 - **D22 (10-12) Sign-In with Ethereum** (viem's built-in `viem/siwe`, no extra package): nonce in a signed httpOnly cookie (10 min) + server-side single-use record (`siwe_nonces`, memory fallback); domain checked against the real `Host` header (never `x-forwarded-host`); session = HMAC-signed httpOnly cookie, 7 days. Attack tests in the session scratchpad: replay, other domain, forged XFH, other chain, wrong signer, missing/reused nonce, tampered cookie, expired: all rejected.
 - **D23 (10-12) Supabase is server-only.** Route handlers use the service-role key after checking the session wallet against the contract (`guard()`: editor / client / either). RLS on, no policies, so the anon key can do nothing; the browser never gets a Supabase key. Labels are public; notes are parties-only; finals are a private bucket.
 - **D24 (10-12) Files go browser → Supabase directly** via one-time signed upload URLs (editor only, refused once paid). Download = parties only + `isPaid` on Arc + a stored final whose sha256 equals the on-chain `latestFileHash` → 60 s signed link → the browser re-hashes before saving (promise 2).
+- **D25 (10-12) Custom domain, not `*.vercel.app`.** MetaMask's site scanner (`dapp-scanning.api.cx.metamask.io/scan?url=<host>`) answers `BLOCK`, "Domain identified as a wallet drainer" (CRITICAL) for **every** `*.vercel.app` host, even unused names; custom domains and netlify/pages.dev/github.io answer `NONE`. That is the red warning on connect. Fix: own domain on the same Vercel project + `NEXT_PUBLIC_SITE_URL`; `next.config.ts` then 307-redirects any `*.vercel.app` host to it (path and query kept). SIWE needs no change (it checks the real Host). Re-check the scanner for the new domain before the demo.
+- **D26 (10-12) Wallet-facing chain name = the public registry's** (`chainid.network`: "Arc Network Testnet" / "Arc"). MetaMask's add-network prompt warns when the requested name isn't part of the registry name. UI label stays `network.label` ("Arc Testnet").
+- **D27 (10-12) Errors name the failing step and keep a short technical detail** (`SignInError` → "Signing in didn't work: …"; RPC failures split into "couldn't reach Arc" vs "your wallet couldn't reach Arc"); the full error goes to the browser console as `[freedit]`.
 - **D13 (pending) Memo.** It needs no contract change, since CallFrom keeps the client EOA as `msg.sender`. Decide in Phase 5 whether the UI wraps pay/revision calls in `Memo.memo(...)` for EOAs (fallback: direct call).
 
 ## Design rules (strict)

@@ -1,11 +1,12 @@
 "use client";
 
-import { BaseError, ContractFunctionRevertedError, erc20Abi, UserRejectedRequestError, type Address, type Hash } from "viem";
+import { BaseError, ContractFunctionRevertedError, erc20Abi, HttpRequestError, TimeoutError, UserRejectedRequestError, type Address, type Hash } from "viem";
 import type { Config } from "wagmi";
 import { getPublicClient, readContract, simulateContract, waitForTransactionReceipt, writeContract } from "wagmi/actions";
 import { freeditAbi } from "./abi/freedit";
+import { SignInError } from "./api";
 import { arcFees } from "./fees";
-import { network, USDC } from "./network";
+import { chain, network, USDC } from "./network";
 import { usd } from "./format";
 
 type FreeditCall =
@@ -73,8 +74,13 @@ export function revertName(e: unknown): string | undefined {
   return revert?.data?.errorName ?? (revert ? "reverted" : undefined);
 }
 
-/** Turns wallet and contract errors into one plain sentence. */
+/**
+ * Turns wallet and contract errors into one plain sentence. Unknown errors keep a short technical detail so a
+ * report says what actually failed; the full error always goes to the browser console.
+ */
 export function explainError(e: unknown): string {
+  console.error("[freedit]", e);
+  if (e instanceof SignInError) return `Signing in didn't work: ${explainError(e.cause)}`;
   if (e instanceof BaseError) {
     if (e.walk((x) => x instanceof UserRejectedRequestError)) return "You cancelled in your wallet. Nothing was sent.";
     const revert = e.walk((x) => x instanceof ContractFunctionRevertedError) as ContractFunctionRevertedError | null;
@@ -82,11 +88,24 @@ export function explainError(e: unknown): string {
     if (name && reasons[name]) return reasons[name];
     if (revert?.reason) return revert.reason === "Blocked address" ? "One of these wallets is blocked on Arc, so USDC can't move." : revert.reason;
     if (/insufficient funds/i.test(e.message)) return "Not enough USDC for the network fee.";
-    return e.shortMessage;
+    // This page's own call to Arc's RPC (simulation, receipt) got no usable answer.
+    const http = e.walk((x) => x instanceof HttpRequestError || x instanceof TimeoutError);
+    if (http) {
+      const status = http instanceof HttpRequestError && http.status ? ` (HTTP ${http.status})` : "";
+      return `Couldn't reach ${network.label} just now${status}. Nothing was sent. Check your connection and try again.`;
+    }
+    // The wallet's own connection to the network failed (it uses the RPC URL saved in the wallet, not ours).
+    if (/rpc endpoint|failed to fetch|fetch failed|\bhttp (request|error|client)|status code/i.test(e.details ?? "")) {
+      return `Your wallet couldn't reach ${network.label}. In your wallet's network settings, check the RPC URL is ${chain.rpcUrls.default.http[0]}, then try again.`;
+    }
+    return withDetail(e.shortMessage, e.details);
   }
   if (e instanceof Error) return e.message;
   return "Something went wrong.";
 }
+
+const withDetail = (message: string, detail?: string) =>
+  detail && !message.includes(detail) ? `${message} (${detail.length > 160 ? `${detail.slice(0, 160)}…` : detail})` : message;
 
 export function needsFunds(balance: bigint | undefined, amount: bigint) {
   // USDC is also the gas token, so keep a cent of headroom for the network fee.

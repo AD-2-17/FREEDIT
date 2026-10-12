@@ -13,8 +13,11 @@ export const networkName: NetworkName = raw === "mainnet" || raw === "local" ? r
 
 // viem ships Arc definitions, but its testnet entry points at *.arc.network / arcscan.app.
 // We use the hostnames from docs.arc.io (connect-to-arc), which we verified on 10-12.
+// The name is what the wallet's "add network" prompt shows. MetaMask flags a name that isn't part of the public
+// registry's entry for this chain id (chainid.network: "Arc Network Testnet"), so we use that exact name.
 const arcTestnetDocs = defineChain({
   ...arcTestnet,
+  name: "Arc Network Testnet",
   rpcUrls: { default: { http: ["https://rpc.testnet.arc.io"], webSocket: ["wss://rpc.testnet.arc.io"] } },
   blockExplorers: { default: { name: "Arc Testnet Explorer", url: "https://explorer.testnet.arc.io", apiUrl: "https://explorer.testnet.arc.io/api" } },
 });

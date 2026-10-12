@@ -39,8 +39,10 @@ _Last updated: 2026-10-12. **Phases 1–4 are done.** Contract live and verified
 - **10-12 Vercel:** https://freedit-one.vercel.app (root `web`, testnet). Auto-deploys on every push to `main`.
 - **10-12 GitHub:** pushed to https://github.com/AD-2-17/FREEDIT (public, branch `main`). Full-history secret scan before pushing: clean. Commits keep your Gmail address (your choice).
 
+- **10-12 Bugs from your first live test.** (1) **MetaMask warning on connect:** MetaMask’s site scanner flags every `*.vercel.app` address as a "wallet drainer" (BLOCK, CRITICAL), including names nobody uses; custom domains come back clean. Fix = own domain (SETUP B12c), and the vercel.app address then forwards to it automatically (`next.config.ts`, tested on a production build). Also: the "add network" prompt now uses the registry name "Arc Network Testnet", so MetaMask doesn’t flag a name mismatch. (2) **"HTTP" error after sign-in on Create project:** not reproducible with a plain test wallet on the live site (connect, sign-in, simulation and the wallet’s confirm step all work; your sign-in at 13:45 UTC reached the server fine). Errors now say which step failed ("Signing in didn’t work: …"), split "couldn’t reach Arc" from "your wallet couldn’t reach Arc", keep the technical detail, and log the full error to the console as `[freedit]`.
 
 ## Next
+0. **YOU: custom domain (SETUP B12c)**, then tell me the domain. Until then MetaMask shows a red warning on the live site.
 1. **YOU: Phase 5, full flow on the live site** (about 20 min): https://freedit-one.vercel.app in two Chrome profiles (Editor, Client), Arc Testnet. Editor: Connect → New project (client = your Client address, price 5, 1 free revision, fee 1) → Upload V1 (a real short MP4 for the preview + any final file, each ≤ 50 MB) → Copy link for your client. Client: Connect → Projects (it's listed) → watch → Request changes (note) → Editor uploads V2 → Client Approve & pay → Download final file. Report anything odd.
 2. Decide on mockup v4 (screens 8–10: role choice, client request link, editor accept). Build it only if approved.
 3. Phase 6: self security review of the contract and API routes (rerun `web/scripts/security/*.mjs` against `npm run dev`), then YOU say "ok to deploy", then YOU run the mainnet deploy (needs mainnet USDC on the deployer, A6–A7). Then set `freedit` + `deployBlock` for mainnet in `web/src/lib/network.ts`, set Vercel `NEXT_PUBLIC_ARC_NETWORK=mainnet`, redeploy.
@@ -64,6 +66,7 @@ _Last updated: 2026-10-12. **Phases 1–4 are done.** Contract live and verified
 - [ ] YOU: B10 X profile, B11 DoraHacks (check the submission form)
 - [ ] YOU: B15 (demo video files: 3 versions, preview + full, each under 50 MB)
 - [x] Packages OK'd, mockups v3 approved (10-12)
+- [ ] YOU: custom domain (SETUP B12c)
 - [ ] YOU: Phase 5 on the live site (see Next)
 - [ ] YOU: approve or skip mockup v4
 

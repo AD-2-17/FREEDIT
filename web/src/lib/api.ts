@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { BaseError, UserRejectedRequestError } from "viem";
 import { createSiweMessage } from "viem/siwe";
 import { useConfig, useConnection } from "wagmi";
 import { signMessage } from "wagmi/actions";
@@ -26,6 +27,13 @@ export async function api<T>(path: string, body?: unknown): Promise<T> {
   return data as T;
 }
 
+/** A sign-in that failed for any reason except the user cancelling, so the error message can name the step. */
+export class SignInError extends Error {
+  constructor(public cause: unknown) {
+    super("Sign-in failed.");
+  }
+}
+
 export type Me = { address: string | null; storage: boolean };
 const meQuery = { queryKey: ["me", chain.id], queryFn: () => api<Me>("/api/auth/me") };
 
@@ -46,23 +54,28 @@ export function useSignIn() {
 
   async function signIn() {
     if (!address) throw new Error("Connect your wallet first.");
-    const current = await qc.fetchQuery({ ...meQuery, staleTime: 0 });
-    if (current.address?.toLowerCase() === address.toLowerCase()) return;
-    const { nonce } = await api<{ nonce: string }>("/api/auth/nonce");
-    const message = createSiweMessage({
-      domain: window.location.host,
-      address,
-      statement: "Sign in to Freedit. This is free: it proves you own this wallet and sends no transaction.",
-      uri: window.location.origin,
-      version: "1",
-      chainId: chain.id,
-      nonce,
-      issuedAt: new Date(),
-      expirationTime: new Date(Date.now() + 10 * 60 * 1000),
-    });
-    const signature = await signMessage(config, { account: address, message });
-    await api("/api/auth/verify", { message, signature });
-    await qc.invalidateQueries({ queryKey: ["me"] });
+    try {
+      const current = await qc.fetchQuery({ ...meQuery, staleTime: 0 });
+      if (current.address?.toLowerCase() === address.toLowerCase()) return;
+      const { nonce } = await api<{ nonce: string }>("/api/auth/nonce");
+      const message = createSiweMessage({
+        domain: window.location.host,
+        address,
+        statement: "Sign in to Freedit. This is free: it proves you own this wallet and sends no transaction.",
+        uri: window.location.origin,
+        version: "1",
+        chainId: chain.id,
+        nonce,
+        issuedAt: new Date(),
+        expirationTime: new Date(Date.now() + 10 * 60 * 1000),
+      });
+      const signature = await signMessage(config, { account: address, message });
+      await api("/api/auth/verify", { message, signature });
+      await qc.invalidateQueries({ queryKey: ["me"] });
+    } catch (e) {
+      if (e instanceof BaseError && e.walk((x) => x instanceof UserRejectedRequestError)) throw e;
+      throw new SignInError(e);
+    }
   }
 
   return { signIn, signedIn, storage: me.data?.storage ?? false, ready: !me.isLoading };

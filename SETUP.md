@@ -205,6 +205,13 @@ Fonts (Geist or Inter) come through `next/font`, so there's no extra package.
 - [ ] YOU: **Environment Variables**: `NEXT_PUBLIC_ARC_NETWORK` = `testnet`, `NEXT_PUBLIC_SITE_URL` = your Vercel URL (e.g. `https://freedit.vercel.app`), `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (same as `.env.local`), `SESSION_SECRET` (a **new** one: run `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`)
 - [ ] YOU: **Deploy** → send me the URL. If you set `NEXT_PUBLIC_SITE_URL` before knowing the URL, fix it and redeploy.
 
+### B12c: Custom domain (10 min + DNS wait). Needed: MetaMask warns on every `*.vercel.app` site
+MetaMask's site scanner labels **all** `*.vercel.app` addresses "wallet drainer" (checked 10-12, even names nobody uses), so every visitor sees a red warning when they connect. A domain of your own is clean. Unregistered on 10-12: `freedit.xyz`, `freedit.app`, `freedit.io`, `freedit.video`, `usefreedit.com` (`getfreedit.com` is taken). `.app` and `.dev` only work over HTTPS, which Vercel provides.
+- [ ] YOU: buy one. Easiest: Vercel → **Domains** (top menu) → **Buy**. DNS is then set up for you. Any registrar works (Namecheap, Porkbun, Cloudflare); check the price at checkout, since some short names are "premium".
+- [ ] YOU: Vercel → project `freedit` → **Settings → Domains → Add** → type the domain → **Add**. If you bought it elsewhere, copy the DNS records Vercel shows into your registrar and wait until Vercel shows **Valid Configuration**.
+- [ ] YOU: **Settings → Environment Variables** → edit `NEXT_PUBLIC_SITE_URL` → `https://<your domain>` (no trailing slash) → **Save** → **Deployments** → latest → **⋯ → Redeploy**
+- [ ] YOU: tell me the domain. ME: check MetaMask's scanner answers `NONE` for it, that `freedit-one.vercel.app` now forwards to it, and update the docs.
+
 ### B14: Environment variables (Phase 3–4)
 You paste these into `web/.env.local` (gitignored) and into Vercel → Project → Settings → Environment Variables. **The server needs no private key**: it only reads the chain and checks wallet signatures.
 
