@@ -8,7 +8,8 @@ import { Icon } from "@/components/icon";
 import { Notice, Spinner } from "@/components/ui";
 import { freeditAbi } from "@/lib/abi/freedit";
 import { parseUsd, shortAddress, usd } from "@/lib/format";
-import { saveProjectMeta } from "@/lib/meta";
+import { useSignIn } from "@/lib/api";
+import { pushProjectMeta, saveProjectMeta } from "@/lib/meta";
 import { chain, network } from "@/lib/network";
 import { explainError, sendFreedit } from "@/lib/tx";
 
@@ -36,6 +37,8 @@ export function NewProject() {
   const [fee, setFee] = useState("");
   const [touched, setTouched] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [signing, setSigning] = useState(false);
+  const { signIn, storage } = useSignIn();
   const [error, setError] = useState<string>();
 
   const clientTrim = client.trim();
@@ -57,6 +60,12 @@ export function NewProject() {
     if (!valid || !address || !ready) return;
     setBusy(true);
     try {
+      // Sign in first (free) so the title and names can be shared with the client right after creation.
+      if (storage) {
+        setSigning(true);
+        await signIn();
+        setSigning(false);
+      }
       const { receipt } = await sendFreedit(config, address, {
         functionName: "createProject",
         args: [clientTrim as Address, priceR.value!, free, feeR.value!],
@@ -66,15 +75,19 @@ export function NewProject() {
         .find((ev) => ev?.eventName === "ProjectCreated");
       const id = created && created.eventName === "ProjectCreated" ? created.args.id : undefined;
       if (id === undefined) throw new Error("Project created, but its number wasn't found. Open your dashboard to see it.");
-      saveProjectMeta(id, {
+      const labels = {
         title: title.trim() || undefined,
         clientName: clientName.trim() || undefined,
         editorName: editorName.trim() || undefined,
-      });
+      };
+      saveProjectMeta(id, labels);
+      // Shared labels are a nice-to-have: the project exists on Arc either way, so a failure here doesn't block.
+      if (storage) await pushProjectMeta(id, labels).catch(() => {});
       router.push(`/p/${id}/upload`);
     } catch (e) {
       setError(explainError(e));
       setBusy(false);
+      setSigning(false);
     }
   }
 
@@ -153,10 +166,10 @@ export function NewProject() {
         </dl>
         {error && <div style={{ marginBottom: 12 }}><Notice tone="bad">{error}</Notice></div>}
         <button type="submit" className="btn primary lg block" disabled={busy || !ready}>
-          {busy ? <><Spinner />Confirm in your wallet…</> : "Create project"}
+          {signing ? <><Spinner />Sign in with your wallet…</> : busy ? <><Spinner />Confirm in your wallet…</> : "Create project"}
         </button>
         <div className="help" style={{ justifyContent: "center", marginTop: 10, textAlign: "center" }}>
-          {!isConnected ? "Connect your wallet (top right) to create a project." : chainId !== chain.id ? `Switch your wallet to ${network.label} (top right).` : "Your wallet asks you to confirm once. Terms can't be changed later."}
+          {!isConnected ? "Connect your wallet (top right) to create a project." : chainId !== chain.id ? `Switch your wallet to ${network.label} (top right).` : storage ? "Your wallet asks you to sign in (free), then confirm once. Terms can't be changed later." : "Your wallet asks you to confirm once. Terms can't be changed later."}
         </div>
       </aside>
     </form>

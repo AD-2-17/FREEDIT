@@ -42,9 +42,7 @@ export const earned = (p: Project) => (p.paid ? p.price : 0n) + BigInt(paidRevis
 /** Same rule as the contract's revisionCost(). */
 export const nextRevisionCost = (p: Project) => (p.revisionsUsed < p.freeRevisions ? 0n : p.revisionFee);
 
-export function parseId(raw: string): bigint | undefined {
-  return /^\d{1,18}$/.test(raw) && raw !== "0" ? BigInt(raw) : undefined;
-}
+export { parseId } from "./ids";
 
 const base = { address: freeditAddress, abi: freeditAbi } as const;
 

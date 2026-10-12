@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useConnect, useConnection, useConnectors, useDisconnect, useSwitchChain } from "wagmi";
+import { signOut } from "@/lib/api";
 import { chain, explorerAddress, network } from "@/lib/network";
 import { shortAddress } from "@/lib/format";
 import { Icon } from "./icon";
@@ -27,6 +29,7 @@ export function WalletButton() {
   const connect = useConnect();
   const disconnect = useDisconnect();
   const switchChain = useSwitchChain();
+  const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const ref = useOutsideClose(open, () => setOpen(false));
@@ -104,7 +107,7 @@ export function WalletButton() {
           </div>
           <div className="mono" style={{ padding: "0 10px 8px", fontSize: 11.5, overflowWrap: "anywhere" }}>{address}</div>
           <a role="menuitem" href={explorerAddress(address)} target="_blank" rel="noreferrer"><Icon name="ext" size="sm" />View on explorer</a>
-          <button role="menuitem" type="button" onClick={() => { setOpen(false); disconnect.mutate(); }}><Icon name="logout" size="sm" />Disconnect</button>
+          <button role="menuitem" type="button" onClick={() => { setOpen(false); disconnect.mutate(); signOut().then(() => qc.invalidateQueries({ queryKey: ["me"] })); }}><Icon name="logout" size="sm" />Disconnect</button>
         </div>
       )}
     </div>

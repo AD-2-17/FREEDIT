@@ -8,7 +8,7 @@ import { Icon } from "@/components/icon";
 import { Notice, RevisionMeter, Status } from "@/components/ui";
 import { WalletButton } from "@/components/wallet";
 import { shortAddress, usd } from "@/lib/format";
-import { useProjectMeta, projectTitle } from "@/lib/meta";
+import { mergeMeta, projectTitle, useLocalMeta, useServerMeta, type ProjectMeta } from "@/lib/meta";
 import { network } from "@/lib/network";
 import { earned, freeditAddress, statusOf, useProjectIds, useProjects, type Project } from "@/lib/project";
 
@@ -19,6 +19,7 @@ export function Dashboard() {
   const { address, isConnected } = useConnection();
   const { ids, isLoading: idsLoading, error: idsError } = useProjectIds(address);
   const projects = useProjects(ids);
+  const serverMeta = useServerMeta(ids);
   const [tab, setTab] = useState<Tab>("all");
 
   const rows: Row[] = useMemo(() => {
@@ -99,7 +100,7 @@ export function Dashboard() {
             <thead>
               <tr><th>Project</th><th>Status</th><th>Next step</th><th>Revisions</th><th className="r">Price</th><th className="r">{clientOnly ? "Paid" : "Earned"}</th><th><span className="sr-only">Open</span></th></tr>
             </thead>
-            <tbody>{shown.map((r) => <ProjectRow key={r.id.toString()} row={r} />)}</tbody>
+            <tbody>{shown.map((r) => <ProjectRow key={r.id.toString()} row={r} server={serverMeta.data?.[r.id.toString()]} />)}</tbody>
           </table>
         </div>
       )}
@@ -107,9 +108,10 @@ export function Dashboard() {
   );
 }
 
-function ProjectRow({ row: { id, p, role } }: { row: Row }) {
+function ProjectRow({ row: { id, p, role }, server }: { row: Row; server?: ProjectMeta }) {
   const router = useRouter();
-  const meta = useProjectMeta(id);
+  const local = useLocalMeta(id);
+  const meta = mergeMeta(local, server);
   const status = statusOf(p);
   const href = `/p/${id}`;
   const other = role === "editor" ? p.client : p.editor;

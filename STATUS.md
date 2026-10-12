@@ -32,6 +32,8 @@ _Last updated: 2026-10-12. **Phases 1–3 are done**: contract tested, deployed 
 - **10-12 Sharing with the client** (after your question): New project has "Your name"; the project page has a "Share with your client" card with a link carrying the title and both names; Upload V1 confirms the project is already on the client's dashboard; client-only wallets see "Paid to editors / Waiting on the editor". Fixed: the activity list could miss an event the explorer hadn't indexed yet (now re-checks while it's behind the contract). Demoed on the local fork: the client's dashboard lists the project with no link at all; opening the link adds the labels.
 - **10-12 Mockup v4 (screens 8–10, for approval):** choose client/editor after connecting; the client can request a project with a link; the editor accepts it. No contract change.
 
+- **10-12 Phase 4 code (Supabase), waiting on keys:** `supabase/schema.sql` (tables, buckets, RLS); server API routes for Sign-In with Ethereum, labels, notes, uploads, downloads (`web/src/server`, `web/src/app/api`); upload page uploads both files with progress; paid page downloads, checks the fingerprint, then saves; notes and titles shared between both sides. Without Supabase keys the app keeps working the Phase 3 way. Checked: tsc, `next build`, 11/11 sign-in attack tests (after fixing a reusable-nonce bug), no server code or keys in browser bundles. `web/.env.local` created (gitignored) with a generated session secret; Supabase lines blank for you.
+
 ## Next
 1. **YOU: Phase 3 check on testnet with your real wallets** (steps below, about 15 min).
 2. Phase 4: Supabase (preview + final file upload, private download after `isPaid`, titles/notes shared between both sides) + Vercel deploy. Needs B12/B13 accounts.

@@ -1,12 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { api, useMe } from "./api";
 import { chain } from "./network";
 
 /**
- * Off-chain labels: project title, client name, change-request notes.
- * Phase 3 keeps them in this browser only (localStorage). Phase 4 moves them to Supabase so both
- * sides see them. Nothing here is trusted for money: amounts, parties and fingerprints come from the chain.
+ * Off-chain labels (project title, display names) and change-request notes.
+ * Shared through Supabase when the server has storage set up (Phase 4); this browser's copy is kept as a
+ * fallback and for instant display. Nothing here is trusted for money: amounts, parties and fingerprints
+ * always come from the contract on Arc.
  */
 export type ProjectMeta = { title?: string; clientName?: string; editorName?: string };
 
@@ -28,16 +31,8 @@ function write(key: string, value: unknown) {
     localStorage.setItem(key, JSON.stringify(value));
     window.dispatchEvent(new Event(EVENT));
   } catch {
-    // storage blocked: labels just won't persist
+    // storage blocked: labels just won't persist on this device
   }
-}
-
-export function saveProjectMeta(id: bigint, meta: ProjectMeta) {
-  write(pKey(id), { ...read<ProjectMeta>(pKey(id)), ...meta });
-}
-
-export function saveNote(noteHash: string, text: string) {
-  write(nKey(noteHash), text);
 }
 
 function useStored<T>(key: string | undefined): T | undefined {
@@ -55,22 +50,83 @@ function useStored<T>(key: string | undefined): T | undefined {
   return value;
 }
 
-export const useProjectMeta = (id: bigint | undefined) => useStored<ProjectMeta>(id ? pKey(id) : undefined) ?? {};
-export const useNote = (hash: string | undefined) => useStored<string>(hash ? nKey(hash) : undefined);
+/** Server labels win where set; this device's copy fills the gaps. */
+export function mergeMeta(local: ProjectMeta | undefined, server: ProjectMeta | undefined): ProjectMeta {
+  const out: ProjectMeta = { ...local };
+  for (const [k, v] of Object.entries(server ?? {})) if (v) out[k as keyof ProjectMeta] = v;
+  return out;
+}
+
+// ── Labels ──────────────────────────────────────────────────────────────────
+
+export function saveProjectMeta(id: bigint, meta: ProjectMeta) {
+  write(pKey(id), { ...read<ProjectMeta>(pKey(id)), ...meta });
+}
+
+/** Publish labels for everyone (editor only, signed in). */
+export async function pushProjectMeta(id: bigint, meta: ProjectMeta) {
+  await api(`/api/projects/${id}/meta`, meta);
+}
+
+/** Labels for many projects in one request (dashboard). */
+export function useServerMeta(ids: readonly bigint[]) {
+  const me = useMe();
+  const key = ids.map(String).join(",");
+  return useQuery({
+    queryKey: ["meta", chain.id, key],
+    queryFn: () => api<{ meta: Record<string, ProjectMeta> }>(`/api/meta?ids=${key}`).then((r) => r.meta),
+    enabled: ids.length > 0 && !!me.data?.storage,
+    staleTime: 30_000,
+  });
+}
+
+export const useLocalMeta = (id: bigint | undefined) => useStored<ProjectMeta>(id ? pKey(id) : undefined);
+
+export function useProjectMeta(id: bigint | undefined): ProjectMeta {
+  const local = useLocalMeta(id);
+  const server = useServerMeta(id ? [id] : []);
+  const s = id ? server.data?.[id.toString()] : undefined;
+  return useMemo(() => mergeMeta(local, s), [local, s]);
+}
 
 /** Title to show when no label is stored. */
 export const projectTitle = (id: bigint, meta: ProjectMeta) => meta.title?.trim() || `Project #${id}`;
 
-/** Display-only text from a link: no control characters, trimmed, capped. */
-const clean = (s: string | null) => (s ?? "").replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 80) || undefined;
+// ── Notes ───────────────────────────────────────────────────────────────────
 
-const LINK_KEYS = { t: "title", c: "clientName", e: "editorName" } as const;
+export function saveNote(noteHash: string, text: string) {
+  write(nKey(noteHash), text);
+}
+
+/** Publish a change-request note (client only, signed in). Only its keccak256 is on Arc. */
+export async function pushNote(id: bigint, text: string) {
+  await api(`/api/projects/${id}/notes`, { text });
+}
 
 /**
- * Link the editor sends to the client. The project is already on the client's dashboard (the contract
- * indexes it by their wallet); the link goes straight to it and carries the labels so the client sees
- * the title and names too. Phase 4 stores labels in Supabase and the extra parameters become unnecessary.
+ * Note texts for one project, keyed by note hash. The server shares them with the editor and the client only,
+ * so it needs a signed-in session; `needsSignIn` tells the page to offer "Sign in to read notes".
  */
+export function useNotes(id: bigint | undefined, signedIn: boolean) {
+  const me = useMe();
+  const q = useQuery({
+    queryKey: ["notes", chain.id, id?.toString(), me.data?.address],
+    queryFn: () => api<{ notes: { noteHash: string; body: string }[] }>(`/api/projects/${id}/notes`).then((r) => r.notes),
+    enabled: !!id && signedIn && !!me.data?.storage,
+    staleTime: 15_000,
+    retry: false,
+  });
+  const map = useMemo(() => new Map((q.data ?? []).map((n) => [n.noteHash.toLowerCase(), n.body])), [q.data]);
+  return { notes: map, needsSignIn: !!me.data?.storage && !signedIn, refetch: q.refetch };
+}
+
+export const useLocalNote = (hash: string | undefined) => useStored<string>(hash ? nKey(hash) : undefined);
+
+// ── Share links (labels travel in the link, so they show even before the client signs in) ──
+
+const clean = (s: string | null) => (s ?? "").replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 80) || undefined;
+const LINK_KEYS = { t: "title", c: "clientName", e: "editorName" } as const;
+
 export function shareLink(origin: string, id: bigint, meta: ProjectMeta): string {
   const q = new URLSearchParams();
   for (const [k, field] of Object.entries(LINK_KEYS)) {

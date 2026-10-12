@@ -10,7 +10,9 @@ import { Icon } from "@/components/icon";
 import { CopyButton, CopyLinkButton, Notice, RevisionMeter, Status, Steps, TxLink, type Step } from "@/components/ui";
 import { useActivity, type ActivityItem } from "@/lib/activity";
 import { dateTime, shortAddress, shortHash, usd } from "@/lib/format";
-import { importMetaFromUrl, projectTitle, shareLink, useNote, useProjectMeta } from "@/lib/meta";
+import { DownloadFinal } from "@/components/download-final";
+import { useSignIn } from "@/lib/api";
+import { importMetaFromUrl, projectTitle, shareLink, useLocalNote, useNotes, useProjectMeta } from "@/lib/meta";
 import { network } from "@/lib/network";
 import {
   earned, freeditAddress, nextRevisionCost, paidRevisions, parseId, statusOf, useProject, useVersions,
@@ -26,6 +28,8 @@ export function ProjectView({ idText }: { idText: string }) {
   const p = project.data as Project | undefined;
   const versions = useVersions(id, p?.version ?? 0);
   const meta = useProjectMeta(id);
+  const { signIn, signedIn, storage } = useSignIn();
+  const notes = useNotes(id, signedIn);
   const activity = useActivity(id, p ? { versions: p.version, revisions: p.revisionsUsed, paid: p.paid } : undefined);
   const [view, setView] = useState<number>();
   const [sheet, setSheet] = useState<"pay" | "changes" | null>(null);
@@ -111,7 +115,7 @@ export function ProjectView({ idText }: { idText: string }) {
 
         <aside className="side">
           {status.key === "paid" ? (
-            <PaidPanel p={p} role={role} editorName={editorName} paymentTx={paymentTx} paidAt={paidItem?.timestamp} />
+            <PaidPanel id={id} p={p} role={role} editorName={editorName} paymentTx={paymentTx} paidAt={paidItem?.timestamp} storage={storage} />
           ) : role === "client" ? (
             <div className="side-sec" style={{ display: "grid", gap: 12 }}>
               <div className="between"><span className="over">Price</span><span className="strong num" style={{ fontSize: 15 }}>{usd(p.price)} <span className="muted" style={{ fontWeight: 500, fontSize: 12.5 }}>USDC</span></span></div>
@@ -166,7 +170,8 @@ export function ProjectView({ idText }: { idText: string }) {
             </div>
           </div>
 
-          <ChangeRequests items={items} />
+          <ChangeRequests items={items} notes={notes.notes} needsSignIn={notes.needsSignIn} isParty={role !== "viewer"}
+            onSignIn={() => signIn().then(() => notes.refetch()).catch(() => {})} />
 
           <div className="side-sec">
             <dl className="kv" style={{ gridTemplateColumns: "110px 1fr", fontSize: 12.5 }}>
@@ -255,39 +260,43 @@ function describe(a: ActivityItem, editorName: string) {
   }
 }
 
-function ChangeRequests({ items }: { items: ActivityItem[] }) {
+function ChangeRequests({ items, notes, needsSignIn, onSignIn, isParty }: {
+  items: ActivityItem[]; notes: Map<string, string>; needsSignIn: boolean; onSignIn: () => void; isParty: boolean;
+}) {
   const requests = items.filter((a): a is ActivityItem & { kind: "revision" } => a.kind === "revision").reverse().slice(0, 4);
   if (requests.length === 0) return null;
   return (
     <div className="side-sec" style={{ display: "grid", gap: 12 }}>
-      <span className="over">Change requests</span>
-      {requests.map((r) => <RequestNote key={r.txHash} r={r} />)}
+      <div className="between">
+        <span className="over">Change requests</span>
+        {needsSignIn && isParty && <button type="button" className="link" style={{ fontSize: 12.5 }} onClick={onSignIn}>Sign in to read notes</button>}
+      </div>
+      {requests.map((r) => <RequestNote key={r.txHash} r={r} text={notes.get(r.noteHash.toLowerCase())} />)}
     </div>
   );
 }
 
-function RequestNote({ r }: { r: ActivityItem & { kind: "revision" } }) {
-  const note = useNote(r.noteHash);
+function RequestNote({ r, text }: { r: ActivityItem & { kind: "revision" }; text?: string }) {
+  const local = useLocalNote(r.noteHash);
+  const note = text ?? local;
   return (
     <div className="cm">
       <div className="row" style={{ fontSize: 12.5 }}><b style={{ fontWeight: 500 }}>On V{r.version}</b><span className="muted">· revision {r.n}{r.paidFee > 0n ? ` · ${usd(r.paidFee)}` : " · free"}</span></div>
-      <p>{note ?? <span className="muted">Note fingerprint <span className="mono">{shortHash(r.noteHash)}</span>. The text is shown to both sides once notes sync (next update).</span>}</p>
+      <p>{note ?? <span className="muted">Only the editor and the client can read this note. On Arc it&apos;s just a fingerprint: <span className="mono">{shortHash(r.noteHash)}</span>.</span>}</p>
     </div>
   );
 }
 
-function PaidPanel({ p, role, editorName, paymentTx, paidAt }: { p: Project; role: string; editorName: string; paymentTx?: Hash; paidAt?: number }) {
+function PaidPanel({ id, p, role, editorName, paymentTx, paidAt, storage }: { id: bigint; p: Project; role: string; editorName: string; paymentTx?: Hash; paidAt?: number; storage: boolean }) {
   return (
     <div className="side-sec" style={{ display: "grid", gap: 16 }}>
       <div className="success">
         <span className="okring"><Icon name="check" /></span>
         <div><div className="strong">Paid {usd(p.price)} USDC to {role === "editor" ? "you" : editorName}</div><div className="muted" style={{ fontSize: 12.5 }}>{paidAt ? dateTime(paidAt) : "Confirmed on Arc"}</div></div>
       </div>
-      {role === "client" && (
-        <>
-          <button type="button" className="btn primary lg block" disabled title="Arrives with file storage in the next update"><Icon name="download" size="sm" />Download final file</button>
-          <div className="help" style={{ margin: 0, justifyContent: "center", textAlign: "center" }}>Downloads switch on with file storage (next update). Until then, the editor sends the file and you check it below.</div>
-        </>
+      {(role === "client" || role === "editor") && storage && <DownloadFinal id={id} expected={p.latestFileHash} />}
+      {role === "client" && !storage && (
+        <div className="help" style={{ margin: 0, justifyContent: "center", textAlign: "center" }}>File downloads aren&apos;t switched on for this site yet. Ask the editor to send the file, then check it below.</div>
       )}
       <FileCheck expected={p.latestFileHash} label="Check the file you received" />
       <div className="card" style={{ padding: 14 }}>

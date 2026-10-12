@@ -7,11 +7,12 @@ import { Icon } from "@/components/icon";
 import { Modal } from "@/components/modal";
 import { Notice, Spinner, TxLink } from "@/components/ui";
 import { avatarText, shortAddress, shortHash, usd } from "@/lib/format";
-import { saveNote } from "@/lib/meta";
+import { useSignIn } from "@/lib/api";
+import { pushNote, saveNote } from "@/lib/meta";
 import { nextRevisionCost, type Project } from "@/lib/project";
 import { ensureAllowance, explainError, needsFunds, sendFreedit, usdcAllowance, usdcBalance } from "@/lib/tx";
 
-type Phase = "idle" | "allowing" | "sending" | "done";
+type Phase = "idle" | "signing" | "allowing" | "sending" | "done";
 
 /** Reads the client's USDC balance and allowance once the sheet opens. */
 function useFunds(owner: Address) {
@@ -111,19 +112,27 @@ export function ChangesSheet({ id, p, account, editorName, onClose, onDone }: {
   const needsAllowance = cost > 0n && allowTx === null && (allowance === undefined || allowance < cost);
   const short = cost > 0n ? needsFunds(balance, cost) : undefined;
   const freeLeft = Math.max(0, p.freeRevisions - p.revisionsUsed);
+  const { signIn, storage } = useSignIn();
 
   async function send() {
     setError(undefined);
-    if (!note.trim()) return setError("Write what you'd like changed.");
+    const text = note.trim();
+    if (!text) return setError("Write what you'd like changed.");
     try {
+      // Sign in first (free) so the note text can be shared with the editor once the request is on Arc.
+      if (storage) {
+        setPhase("signing");
+        await signIn();
+      }
       if (needsAllowance) {
         setPhase("allowing");
         setAllowTx(await ensureAllowance(config, account, cost));
       }
       setPhase("sending");
-      const noteHash = keccak256(toBytes(note.trim()));
-      saveNote(noteHash, note.trim());
+      const noteHash = keccak256(toBytes(text));
+      saveNote(noteHash, text);
       await sendFreedit(config, account, { functionName: "requestRevision", args: [id, noteHash] });
+      if (storage) await pushNote(id, text).catch(() => setError("Request sent, but the note didn't reach the editor. It's saved on this device."));
       setPhase("done");
       onDone();
     } catch (e) {
@@ -132,7 +141,7 @@ export function ChangesSheet({ id, p, account, editorName, onClose, onDone }: {
     }
   }
 
-  const busy = phase === "allowing" || phase === "sending";
+  const busy = phase === "signing" || phase === "allowing" || phase === "sending";
   return (
     <Modal title="Request changes" onClose={onClose} locked={busy}>
       <h2 className="title" style={{ fontSize: 18 }}>Request changes to V{p.version}</h2>
@@ -155,7 +164,7 @@ export function ChangesSheet({ id, p, account, editorName, onClose, onDone }: {
       {short && <div style={{ marginBottom: 12 }}><Notice tone="warn">{short}</Notice></div>}
       {error && <div style={{ marginBottom: 12 }}><Notice tone="bad">{error}</Notice></div>}
       <button type="button" className="btn primary lg block" onClick={send} disabled={busy || !!short}>
-        {phase === "allowing" ? <><Spinner />Confirm the allowance…</> : phase === "sending" ? <><Spinner />Confirm in your wallet…</> : cost === 0n ? "Send request · free" : `Send request · ${usd(cost)}`}
+        {phase === "signing" ? <><Spinner />Sign in with your wallet…</> : phase === "allowing" ? <><Spinner />Confirm the allowance…</> : phase === "sending" ? <><Spinner />Confirm in your wallet…</> : cost === 0n ? "Send request · free" : `Send request · ${usd(cost)}`}
       </button>
     </Modal>
   );

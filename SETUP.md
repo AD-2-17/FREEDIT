@@ -193,6 +193,18 @@ Fonts (Geist or Inter) come through `next/font`, so there's no extra package.
 - Later (Phase 4): YOU paste one SQL script I write into SQL Editor → Run. It creates the tables (profiles, project titles, comments, activity) and two storage buckets (`previews` for watermarked clips, `finals` **private** for full files).
 - Free-plan limits: **50 MB max per file** ([docs](https://supabase.com/docs/guides/storage/uploads/file-limits)); the project pauses after a week of inactivity.
 
+### B13b: Supabase setup for Phase 4 (YOU, 5 min, after the project exists)
+- [ ] YOU: Supabase → your `freedit` project → **SQL Editor** → New query → paste all of `supabase/schema.sql` → **Run**. Expect "Success. No rows returned". (Or I run it through the Supabase connector.)
+- [ ] YOU: **Project Settings → Data API** → copy the **Project URL** → paste after `SUPABASE_URL=` in `web\.env.local`
+- [ ] YOU: **Project Settings → API Keys** → reveal the **service_role** (or "secret") key → paste after `SUPABASE_SERVICE_ROLE_KEY=` in `web\.env.local`. This key can read and write everything: keep it only in that file and in Vercel, never in chat or code.
+- [ ] YOU: restart `npm run dev`, then tell me "supabase keys in"
+
+### B12b: Vercel deploy (YOU, 10 min, after the GitHub push)
+- [ ] YOU: https://vercel.com/new → **Import** the `freedit` GitHub repo
+- [ ] YOU: **Root Directory** → `web` (Framework: Next.js is detected)
+- [ ] YOU: **Environment Variables**: `NEXT_PUBLIC_ARC_NETWORK` = `testnet`, `NEXT_PUBLIC_SITE_URL` = your Vercel URL (e.g. `https://freedit.vercel.app`), `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (same as `.env.local`), `SESSION_SECRET` (a **new** one: run `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`)
+- [ ] YOU: **Deploy** → send me the URL. If you set `NEXT_PUBLIC_SITE_URL` before knowing the URL, fix it and redeploy.
+
 ### B14: Environment variables (Phase 3–4)
 You paste these into `web/.env.local` (gitignored) and into Vercel → Project → Settings → Environment Variables. **The server needs no private key**: it only reads the chain and checks wallet signatures.
 
