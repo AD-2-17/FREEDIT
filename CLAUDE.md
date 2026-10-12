@@ -53,8 +53,8 @@ Docs MCP: `circle` (`https://api.circle.com/v1/codegen/mcp`, user scope) is conf
 | Arc Foundry is a fork of Foundry with Arc's precompiles (native USDC, blocklist). Binaries for Linux x86_64/arm64 and macOS arm64 only. **Windows = WSL.** Latest `v0.8.0-2` (2026-09-18), github.com/circlefin/arc-foundry. That release reports `forge Version: 1.7.1-dev` (commit `d497bee`) | ✅ | install-arc-foundry, GitHub releases, `arc-forge --version` |
 | **Arc precompiles are off unless `network = "arc"`** (or `--network arc`). Without it, the real USDC's `transferFrom` calls the blocklist precompile `0x1800…0001`, burns ~1B gas and reverts with no data. Set in `foundry.toml`. The `--network` CLI flag does **not** override the toml value; `FOUNDRY_NETWORK=<x>` does | ✅ tested 10-12 | not in the docs (install / troubleshoot pages only show `--fork-url`) |
 | Blocklist revert reason in the EVM is `"Blocked address"` (the troubleshoot page's example shows "Blocklisted address"). The live RPC rejects such calls before execution: `-32603 Blocked address` | ✅ tested 10-12 | `arc-cast call --trace` on testnet |
-| Deploying Freedit ≈ 2.0M gas ≈ $0.10 USDC at 51 gwei (testnet simulation) | ✅ tested 10-12 | `arc-forge script` dry run |
-| Testnet contract verification: `--verifier blockscout --verifier-url https://explorer.testnet.arc.io/api/` | ✅ | deploy-on-arc |
+| Deploying Freedit: forge estimates 2.0M gas; **actual 1,552,079 gas × 32.5 gwei = $0.0504 USDC** (testnet, 10-12) | ✅ tested 10-12 | testnet deploy receipt |
+| Testnet contract verification: `--verifier blockscout --verifier-url https://explorer.testnet.arc.io/api/` | ✅ used 10-12: "Pass - Verified" after one 15 s retry | deploy-on-arc, our deploy |
 | Mainnet verification URL `https://explorer.arc.io/api/` | ⚠️ endpoint is live Blockscout (backend v11.3.3, `/api` answers like testnet); not yet used for a real verification | probed 10-12 |
 
 ## Contract design (`contracts/src/Freedit.sol`)
@@ -72,7 +72,7 @@ Docs MCP: `circle` (`https://api.circle.com/v1/codegen/mcp`, user scope) is conf
 ## Deployed addresses
 | Network | Freedit | Deploy tx | Verified |
 |---|---|---|---|
-| Arc Testnet (5042002) | _not yet_ | | |
+| Arc Testnet (5042002) | [`0xC82aB1b65866b43A0F3794ba6d5EAC0a55df4895`](https://explorer.testnet.arc.io/address/0xC82aB1b65866b43A0F3794ba6d5EAC0a55df4895) | [`0x895f…ae68`](https://explorer.testnet.arc.io/tx/0x895f639f3778c360440e23ad0bd9cbf301e705088c86361f40a693febb8fae68), block 66796009, 10-12, from deployer `0x1037…0866` | ✅ Blockscout |
 | Arc Mainnet (5042) | _not yet_ | | |
 
 ## Repo layout

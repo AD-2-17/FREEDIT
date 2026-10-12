@@ -11,7 +11,8 @@ Never paste a private key, recovery phrase or password into chat. Addresses are 
 ## Order for today (Oct 12)
 We're about a day behind, and the critical path is now the testnet deploy plus mainnet USDC:
 1. ~~B1 move out of OneDrive~~ ✓ (now at `C:\Users\athar\Documents\DEV\freedit`) · ~~B2 git~~ ✓ · ~~B4 WSL~~ ✓ · ~~B5 Arc Foundry~~ ✓ · ~~B7 tests~~ ✓ 41/41 pass
-2. → **next:** **A1–A3** wallets and networks → **A4** deployer keystore → **A5** faucet → Phase 2 testnet deploy (command in STATUS.md)
+2. ~~A1–A5 wallets, keystore, faucet~~ ✓ · ~~A8 testnet deploy~~ ✓ verified
+3. → **next:** approve mockups + packages (unblocks the web app), and **A6 mainnet USDC** (unblocks the mainnet deploy)
 4. **Start A6 (mainnet USDC) today**. Exchange withdrawals and KYC can take hours.
 5. B9–B13 accounts, whenever you're waiting on something
 
@@ -82,7 +83,7 @@ Why a keystore instead of a plaintext `.env`: it's encrypted, lives in Ubuntu's 
 - [ ] YOU: in the Client wallet on **Arc** mainnet, send **$1.00** to the Editor address and **$2.00** to the deployer address
 - [ ] YOU: check all three balances on https://explorer.arc.io
 
-### A8: Testnet deploy (Phase 2, 5 min). Needs B5, A4, A5.
+### A8: Testnet deploy ✓ done 10-12: `0xC82aB1b65866b43A0F3794ba6d5EAC0a55df4895`, verified
 - [ ] YOU: run the deploy command I give you in the Ubuntu terminal (it asks for the keystore password)
 - [ ] YOU: open the contract on https://explorer.testnet.arc.io and check the **Contract** tab shows verified source
 - ME: record the address in CLAUDE.md and the app config
