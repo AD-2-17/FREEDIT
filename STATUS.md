@@ -39,54 +39,33 @@ _Last updated: 2026-10-12. **Phases 1–4 are done.** Contract live and verified
 - **10-12 Vercel:** https://freedit-one.vercel.app (root `web`, testnet). Auto-deploys on every push to `main`.
 - **10-12 GitHub:** pushed to https://github.com/AD-2-17/FREEDIT (public, branch `main`). Full-history secret scan before pushing: clean. Commits keep your Gmail address (your choice).
 
+
 ## Next
 1. **YOU: Phase 5, full flow on the live site** (about 20 min): https://freedit-one.vercel.app in two Chrome profiles (Editor, Client), Arc Testnet. Editor: Connect → New project (client = your Client address, price 5, 1 free revision, fee 1) → Upload V1 (a real short MP4 for the preview + any final file, each ≤ 50 MB) → Copy link for your client. Client: Connect → Projects (it's listed) → watch → Request changes (note) → Editor uploads V2 → Client Approve & pay → Download final file. Report anything odd.
 2. Decide on mockup v4 (screens 8–10: role choice, client request link, editor accept). Build it only if approved.
-3. Phase 6: self security review of contract + API routes (rerun ), then YOU say "ok to deploy", then YOU run the mainnet deploy (needs mainnet USDC on the deployer, A6–A7). Then set  + deployBlock in , switch Vercel , redeploy.
-4. Phase 7: live example project on mainnet (A11), link it from the landing page and README.
+3. Phase 6: self security review of the contract and API routes (rerun `web/scripts/security/*.mjs` against `npm run dev`), then YOU say "ok to deploy", then YOU run the mainnet deploy (needs mainnet USDC on the deployer, A6–A7). Then set `freedit` + `deployBlock` for mainnet in `web/src/lib/network.ts`, set Vercel `NEXT_PUBLIC_ARC_NETWORK=mainnet`, redeploy.
+4. Phase 7: live example project on mainnet (A11), linked from the landing page and README.
 5. Phase 8/9: README (promises, how it works, contract links, limits), favicon, demo video (B15/B16), DoraHacks submission (B11). Deadline **Oct 14, 23:59 US Eastern** (target Oct 13).
 
+## Known limits
+- Files up to 50 MB (Supabase free plan). Production path: Cloudflare R2.
+- Supabase free projects pause after a week without activity: open the dashboard to wake it.
+- Favicon is still Next's default.
+
 ## Blockers
-- Phase 6 needs mainnet USDC (A6). Exchange withdrawals can take hours, so this is the riskiest item for the Oct 13 target.
+- Phase 6 needs mainnet USDC (A6). All three wallets have $0 on mainnet. Exchange withdrawals can take hours, so this is the riskiest item for the deadline.
 
 ## YOU: actions pending
-- [ ] YOU: delete the old OneDrive copy `C:\Users\athar\OneDrive\Documents\CLAUDE\ARC\freedit` once you've confirmed the DEV folder opens fine (it was identical on 10-12, and keeping two copies invites edits to the wrong one)
+- [ ] YOU: delete the old OneDrive copy `C:\Users\athar\OneDrive\Documents\CLAUDE\ARC\freedit` (stale; the real repo is `C:\Users\athar\Documents\DEV\freedit`)
 - [x] A1–A5 done 10-12 (wallets, keystore `deployer`, faucet). Addresses below.
 - [x] Phase 2 testnet deploy, done 10-12
-- [ ] YOU: A6–A7 (mainnet USDC from India, then split it): start today
+- [ ] YOU: A6–A7 (mainnet USDC from India, then split it)
 - [x] GitHub, Vercel, Supabase done 10-12
 - [ ] YOU: B10 X profile, B11 DoraHacks (check the submission form)
 - [ ] YOU: B15 (demo video files: 3 versions, preview + full, each under 50 MB)
 - [x] Packages OK'd, mockups v3 approved (10-12)
 - [ ] YOU: Phase 5 on the live site (see Next)
 - [ ] YOU: approve or skip mockup v4
-
-## Addresses (public)
-| Role | Address |
-|---|---|
-| deployer | `0x1037729af7ccCFFD038005acA26aaa2F5DAA0866` |
-| Freedit Editor (demo) | `0xa8AeBCFB34a669BFF1127D10f97C36C5d992fB8B` |
-| Freedit Client (demo) | `0x2C1c06E6Cf809Ce06eDC383dAe97BF15fe5986De` |
-
-Checked 10-12 (read-only): checksums valid, all plain wallets (EOAs, so Memo works later), none blocklisted, nonce 0.
-Testnet: $20.00 each (deployer $19.95 after the deploy). Mainnet: $0.00 each (waiting on A6).## Known limits
-- Files up to 50 MB (Supabase free plan). Production path: Cloudflare R2.
-- Supabase free projects pause after a week without activity: open the dashboard to wake it.
-- Favicon is still Next's default.
-
-## Blockers
-- Phase 4 needs Supabase + Vercel accounts (B12, B13).
-- Phase 6 needs mainnet USDC (A6). Exchange withdrawals can take hours, so this is the riskiest item for the Oct 13 target.
-
-## YOU: actions pending
-- [ ] YOU: delete the old OneDrive copy `C:\Users\athar\OneDrive\Documents\CLAUDE\ARC\freedit` once you've confirmed the DEV folder opens fine (it was identical on 10-12, and keeping two copies invites edits to the wrong one)
-- [x] A1–A5 done 10-12 (wallets, keystore `deployer`, faucet). Addresses below.
-- [x] Phase 2 testnet deploy, done 10-12
-- [ ] YOU: A6–A7 (mainnet USDC from India, then split it): start today
-- [ ] YOU: B9–B13 (GitHub, X, DoraHacks, Vercel, Supabase)
-- [ ] YOU: B15 (demo video files: 3 versions, preview + full, each under 50 MB)
-- [x] Packages OK'd, mockups v3 approved (10-12)
-- [ ] YOU: Phase 3 check on testnet (see above)
 
 ## Addresses (public)
 | Role | Address |
