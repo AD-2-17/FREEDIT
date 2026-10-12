@@ -156,18 +156,65 @@
   .steps .now { color: var(--text); font-weight: 500; }
   .steps .now .b { border: 1.5px solid var(--text); color: var(--text); }
 
-  /* landing */
-  .land { display: grid; grid-template-columns: 1fr 372px; gap: 56px; padding: 84px 64px 72px; align-items: center; }
-  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; height: 28px; padding: 0 12px; }
-  .display { font-size: 42px; line-height: 1.08; letter-spacing: -.035em; font-weight: 600; margin: 18px 0 0; }
-  .lede { font-size: 16px; color: var(--text-2); max-width: 520px; margin: 18px 0 30px; line-height: 1.6; }
-  .promises { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); margin: 0 64px; }
-  .promises > div { padding: 24px 24px 28px 0; display: flex; gap: 12px; }
-  .promises > div + div { padding-left: 24px; border-left: 1px solid var(--line); }
-  .promises b { display: block; font-weight: 500; margin-bottom: 2px; }
-  .promises p { margin: 0; color: var(--muted); font-size: 13px; }
-  .pic { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line); display: grid; place-items: center; color: var(--text-2); flex: none; }
-  .land-foot { display: flex; justify-content: space-between; padding: 16px 64px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12.5px; }
+  /* landing (v3, editorial). Sheets on a black frame; the proof sheet stays dark and the last (cta) sheet is brand blue in both themes. */
+  :root { --brand: #2950f5; --frame: #0a0a0b; --sheet: #f4f4f2; --sheet-line: #f4f4f2; --proof: #141416; --hl: #2950f5; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --sheet: #111113; --sheet-line: #222226; --proof: #070708; --hl: #7d95ff; } }
+  :root[data-theme="dark"] { --sheet: #111113; --sheet-line: #222226; --proof: #070708; --hl: #7d95ff; }
+  .lx { background: var(--frame); padding: 10px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .lx-sheet { background: var(--sheet); border: 1px solid var(--sheet-line); border-radius: 24px; padding: 26px 44px 48px; color: var(--text); }
+  .lx-sheet.proof { background: var(--proof); border-color: #26262b; color: #ededf0; }
+  .lx-sheet.cta { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .lx-nav { display: flex; justify-content: space-between; align-items: center; }
+  .lx-nav a { color: var(--text-2); font-size: 13.5px; text-decoration: none; }
+  .lx-nav a.lx-hl, .lx-hl { color: var(--hl); }
+  .lx-giant { font-size: 116px; line-height: .9; letter-spacing: -.058em; font-weight: 600; margin: 76px 0 0; }
+  .lx-hero { display: grid; grid-template-columns: 1fr 340px; gap: 56px; align-items: end; margin-top: 40px; }
+  .lx-sub { font-size: 20px; line-height: 1.45; color: var(--text-2); max-width: 520px; margin: 0 0 28px; letter-spacing: -.01em; }
+  .lx-label { display: flex; align-items: center; gap: 14px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 40px 0 30px; }
+  .lx-label .tc2 { font-family: "Geist Mono", ui-monospace, monospace; letter-spacing: 0; color: var(--text); font-size: 12.5px; }
+  .lx-label .rule { width: 48px; height: 1px; background: currentColor; opacity: .6; }
+  .lx-h { font-size: 64px; line-height: .98; letter-spacing: -.045em; font-weight: 600; margin: 0; }
+  .lx-statement { font-size: 40px; line-height: 1.16; letter-spacing: -.032em; font-weight: 500; margin: 0; max-width: 1000px; }
+  .lx-statement em { font-style: normal; color: var(--hl); }
+  .lx-cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; border-top: 1px solid var(--line); margin-top: 44px; padding-top: 24px; font-size: 16px; line-height: 1.55; color: var(--muted); }
+  .lx-cols2 b { color: var(--text); font-weight: 500; }
+  .lx-steps { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 52px; border-top: 1px solid var(--line); }
+  .lx-steps > div { padding: 24px 24px 0 0; }
+  .lx-steps > div + div { padding-left: 24px; border-left: 1px solid var(--line); }
+  .lx-num { font-size: 76px; font-weight: 300; letter-spacing: -.05em; line-height: 1; margin-bottom: 22px; }
+  .lx-steps b { display: block; font-size: 18px; font-weight: 600; letter-spacing: -.01em; margin-bottom: 6px; }
+  .lx-steps p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+  .lx-rows > div { display: grid; grid-template-columns: 56px 1fr 400px 40px; align-items: center; gap: 16px; padding: 24px 0; border-bottom: 1px solid var(--line); }
+  .lx-rows > div:first-child { border-top: 1px solid var(--line); }
+  .lx-rows .n { font-family: "Geist Mono", ui-monospace, monospace; font-size: 12px; color: var(--faint); }
+  .lx-rows .t { font-size: 42px; letter-spacing: -.045em; font-weight: 500; line-height: 1; }
+  .lx-rows p { margin: 0; color: var(--muted); font-size: 14.5px; line-height: 1.5; }
+  .lx-log { background: #0b0b0c; border: 1px solid #26262b; border-radius: 16px; padding: 20px 22px; font-family: "Geist Mono", ui-monospace, monospace; font-size: 13px; line-height: 1.95; color: #b6b6be; }
+  .lx-log .ev { color: #ededf0; display: inline-block; min-width: 168px; }
+  .lx-log .ok { color: #3ecf8e; } .lx-log .hl { color: #7d95ff; }
+  .lx-cmp { width: 100%; border-collapse: collapse; margin-top: 44px; font-size: 15px; }
+  .lx-cmp th { text-align: left; font-weight: 500; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; padding: 0 16px 12px 0; border-bottom: 1px solid var(--line); }
+  .lx-cmp td { padding: 18px 16px 18px 0; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--muted); }
+  .lx-cmp td:first-child { width: 26%; color: var(--text-2); }
+  .lx-cmp td.us { color: var(--text); font-weight: 500; }
+  .lx-cta { font-size: 100px; line-height: .92; letter-spacing: -.058em; font-weight: 600; margin: 0; }
+  .lx-round { width: 76px; height: 76px; border-radius: 50%; background: #0a0a0b; color: #fff; display: grid; place-items: center; }
+  .lx-foot { display: flex; justify-content: space-between; border-top: 1px solid rgba(255, 255, 255, .35); margin-top: 44px; padding-top: 16px; font-size: 13px; }
+  .lx-foot a { color: #fff; text-decoration: none; }
+  .lx-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+  /* hero timeline: the whole project story on one track */
+  .lx-track { position: relative; height: 80px; margin: 60px 0 0; }
+  .lx-track .line, .lx-track .done { position: absolute; left: 0; top: 21px; height: 2px; border-radius: 1px; }
+  .lx-track .line { right: 0; background: var(--line-strong); }
+  .lx-track .done { width: 77%; background: var(--text); }
+  .lx-mk { position: absolute; top: 15px; transform: translateX(-50%); display: grid; grid-template-rows: 14px 24px 16px; justify-items: center; align-items: center; font-size: 12px; white-space: nowrap; }
+  .lx-mk .a { color: var(--text); font-weight: 500; }
+  .lx-mk .b { color: var(--muted); }
+  .lx-mk i { order: -1; width: 11px; height: 11px; border-radius: 50%; background: var(--sheet); border: 2px solid var(--text); }
+  .lx-mk.paid i { background: var(--brand); border-color: var(--brand); }
+  .lx-mk.paid .a { color: var(--hl); }
+  .lx-playhead { position: absolute; top: 4px; height: 30px; width: 2px; margin-left: -1px; background: var(--brand); }
+  .lx-playhead::before { content: ""; position: absolute; top: -7px; left: -5px; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 8px solid var(--brand); }
 
   /* pages */
   .page { padding: 28px 32px 32px; }
@@ -274,6 +321,8 @@
     <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/><path d="M17 12h4v4h-4a2 2 0 0 1 0-4z"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
     <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m6 13 6 6 6-6"/></symbol>
+    <symbol id="i-rev" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/></symbol>
     <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M5 2v20l3-2 2 2 2-2 2 2 2-2 3 2V2l-3 2-2-2-2 2-2-2-2 2z"/><path d="M9 9h6M9 13h6"/></symbol>
   </defs>
 </svg>
@@ -281,7 +330,7 @@
 <div class="doc">
   <header class="doc-head">
     <div>
-      <h1>Freedit page designs · v2</h1>
+      <h1>Freedit page designs · v3</h1>
       <p>All 8 screens, in both themes. Use the switch on the right (or the sun / moon button inside any screen) to compare light and dark. In a small window the screens shrink to fit; they're designed for a laptop-width browser. Names and amounts are demo data; the wallet addresses are your real demo Editor and Client wallets, and the contract is the one live on Arc Testnet.</p>
     </div>
     <div class="seg" role="group" aria-label="Theme">
@@ -293,8 +342,9 @@
 
   <div class="doc-grid">
     <div class="doc-box">
-      <h3>What changed from v1</h3>
+      <h3>What changed</h3>
       <ul>
+        <li><svg class="i sm ok"><use href="#i-check"/></svg><span><b>v3:</b> the landing page (screen 1) is now an editorial, story-style page inspired by heldby, with Freedit's own colour, timeline graphic and copy. Screens 2–7 stay clean and compact for daily use.</span></li>
         <li><svg class="i sm ok"><use href="#i-check"/></svg>Light and dark themes. The app follows your device setting, with a switch in the top bar.</li>
         <li><svg class="i sm ok"><use href="#i-check"/></svg>One typeface (Geist), one accent (blue), black or white main buttons, line icons. No gradients, glows or blur.</li>
         <li><svg class="i sm ok"><use href="#i-check"/></svg>Every project page shows a progress line and says in plain words what happens next.</li>
@@ -305,8 +355,10 @@
     <div class="doc-box">
       <h3>For you to decide</h3>
       <ul>
-        <li><svg class="i sm muted"><use href="#i-info"/></svg><span><b>Headline.</b> A (shown): "Get paid for every revision. Deliver the final cut when it's paid." B: "Freedit: paid revisions and pay-to-unlock delivery for video editors."</span></li>
-        <li><svg class="i sm muted"><use href="#i-info"/></svg><span><b>Accent colour.</b> Blue is used only for links, timecodes and the current version. Keep it, or name another.</span></li>
+        <li><svg class="i sm muted"><use href="#i-info"/></svg><span><b>Headline.</b> A (shown, giant): "Get paid for every revision." with "Deliver the final cut only when it's paid." under it. B: "Freedit: paid revisions and pay-to-unlock delivery for video editors."</span></li>
+        <li><svg class="i sm muted"><use href="#i-info"/></svg><span><b>Brand colour.</b> Blue (the closing section and highlights), chosen so we don't look like heldby's red. Keep it, or name another.</span></li>
+        <li><svg class="i sm muted"><use href="#i-info"/></svg><span><b>Section 6 "Not an escrow".</b> Keep the comparison, or drop it.</span></li>
+        <li><svg class="i sm muted"><use href="#i-info"/></svg><span><b>App screens (2–7).</b> Keep them clean as shown (recommended), or also give them the rounded-sheet look.</span></li>
         <li><svg class="i sm muted"><use href="#i-info"/></svg><span><b>Approve</b> with "approved", or tell me what to change (screen number + what).</span></li>
       </ul>
     </div>
@@ -359,46 +411,149 @@
     </div>
   </section>
 
-  <!-- 1 LANDING -->
+  <!-- 1 LANDING (v3, editorial) -->
   <section class="frame" id="landing">
-    <div class="frame-head"><h2>1 · Landing</h2><span class="route">/</span></div>
-    <div class="screen"><div class="screen-inner">
-      <div class="appbar">
-        <span class="brand"><span class="mark"><svg viewBox="0 0 10 10"><path d="M1.5 1v8l7-4z"/></svg></span>Freedit</span>
-        <span class="row g16">
-          <a class="navlink">Example project</a><a class="navlink">GitHub</a>
-          <button type="button" class="iconbtn" data-theme-flip aria-label="Switch theme"><svg class="i sm ic-moon"><use href="#i-moon"/></svg><svg class="i sm ic-sun"><use href="#i-sun"/></svg></button>
-          <span class="btn"><svg class="i sm"><use href="#i-wallet"/></svg>Connect wallet</span>
-        </span>
-      </div>
-      <div class="land">
-        <div>
-          <span class="eyebrow"><i class="dot" style="--c:var(--ok)"></i>Live on Arc · payments in USDC</span>
-          <h1 class="display">Get paid for every revision.<br>Deliver the final cut<br>when it's paid.</h1>
-          <p class="lede">Video editors set the price and the free revisions. Extra revisions are paid on the spot, and the full-quality file stays locked until the client pays you directly.</p>
-          <div class="row g16"><span class="btn primary lg">Create a project</span><a class="link">See a real paid project on Arc <svg class="i sm"><use href="#i-arrow"/></svg></a></div>
+    <div class="frame-head"><h2>1 · Landing</h2><span class="route">/ · v3, editorial (inspired by heldby, our own identity)</span></div>
+    <div class="screen"><div class="screen-inner lx">
+
+      <!-- Sheet 1: hero -->
+      <div class="lx-sheet">
+        <div class="lx-nav">
+          <span class="row g12"><span class="brand"><span class="mark"><svg viewBox="0 0 10 10"><path d="M1.5 1v8l7-4z"/></svg></span>Freedit</span><span class="muted" style="font-size:12.5px">Paid revisions · on Arc</span></span>
+          <span class="row" style="gap:22px">
+            <a>How it works</a><a>Proof</a><a>Why Freedit</a>
+            <a class="lx-hl row" style="gap:4px">Launch app <svg class="i xs"><use href="#i-ext"/></svg></a>
+            <button type="button" class="iconbtn" data-theme-flip aria-label="Switch theme"><svg class="i sm ic-moon"><use href="#i-moon"/></svg><svg class="i sm ic-sun"><use href="#i-sun"/></svg></button>
+          </span>
         </div>
-        <div class="card" style="padding:14px; box-shadow:var(--shadow)">
-          <div class="player" style="border-radius:8px"><div class="wm" style="font-size:15px">PREVIEW</div><div class="playbtn" style="width:42px; height:42px"><svg class="i"><use href="#i-play"/></svg></div></div>
-          <div class="between" style="margin:12px 2px 2px"><div><div class="strong" style="font-size:13.5px">Diwali launch reel · V3</div><div class="muted" style="font-size:12.5px">Kavya Menon → Bramble &amp; Rye</div></div><span class="st" style="font-size:12.5px"><i class="dot" style="--c:var(--accent)"></i>Awaiting review</span></div>
-          <div class="between" style="margin:14px 2px 10px; font-size:12.5px"><span class="muted">Revisions</span><span class="row"><span class="meter"><i class="on"></i><i class="paid"></i></span><span class="t2">1 free · 1 paid</span></span></div>
-          <span class="btn primary block">Approve &amp; pay $200.00</span>
-          <div class="row muted" style="justify-content:center; font-size:12px; margin-top:8px"><svg class="i xs"><use href="#i-lock"/></svg>Final file unlocks after payment</div>
+        <h1 class="lx-giant">Get paid for<br>every revision.</h1>
+        <div class="lx-hero">
+          <div>
+            <p class="lx-sub">Deliver the final cut only when it's paid. Extra revisions pay the editor on the spot, and Freedit never touches the money.</p>
+            <div class="row g16"><span class="btn primary lg">Create a project</span><a class="link">See a real paid project <svg class="i sm"><use href="#i-arrow"/></svg></a></div>
+          </div>
+          <div class="card" style="padding:16px; box-shadow:var(--shadow); background:var(--bg)">
+            <div class="between" style="font-size:12.5px"><span class="mono muted">Project #12</span><span class="st" style="font-size:12.5px"><i class="dot" style="--c:var(--accent)"></i>Awaiting approval</span></div>
+            <div class="strong" style="margin:10px 0 2px">Diwali launch reel · V3</div>
+            <div class="row" style="align-items:baseline; gap:6px"><span style="font-size:30px; font-weight:600; letter-spacing:-.03em" class="num">$200.00</span><span class="muted" style="font-size:12.5px">USDC · paid on approval</span></div>
+            <dl class="kv" style="grid-template-columns:96px 1fr; margin:12px 0 14px; font-size:12.5px">
+              <dt>Revisions</dt><dd class="row"><span class="meter"><i class="on"></i><i class="paid"></i></span>1 free · 1 paid</dd>
+              <dt>Final file</dt><dd class="row"><svg class="i xs"><use href="#i-lock"/></svg>Locked until paid</dd>
+            </dl>
+            <span class="btn primary block">Approve &amp; pay $200.00</span>
+          </div>
+        </div>
+        <div class="lx-track" aria-label="A project from first version to unlocked file">
+          <div class="line"></div><div class="done"></div>
+          <div class="lx-mk" style="left:5%"><span class="a">V1</span><i></i><span class="b">Oct 12</span></div>
+          <div class="lx-mk" style="left:19%"><span class="a">Changes</span><i></i><span class="b">free</span></div>
+          <div class="lx-mk" style="left:33%"><span class="a">V2</span><i></i><span class="b">Oct 12</span></div>
+          <div class="lx-mk" style="left:47%"><span class="a">Changes</span><i></i><span class="b">$15.00 → editor</span></div>
+          <div class="lx-mk" style="left:61%"><span class="a">V3</span><i></i><span class="b">Oct 13</span></div>
+          <div class="lx-mk paid" style="left:77%"><span class="a">Paid</span><i></i><span class="b">$200.00 → editor</span></div>
+          <div class="lx-mk" style="left:93%"><span class="a">Unlocked</span><i></i><span class="b">file matches</span></div>
+          <div class="lx-playhead" style="left:77%"></div>
+        </div>
+        <div class="lx-meta">
+          <span class="row"><i class="dot" style="--c:var(--ok)"></i>Live on Arc Testnet</span>
+          <span class="row">Contract <a class="link mono">0xC82a…4895 <svg class="i xs"><use href="#i-ext"/></svg></a></span>
+          <span>$0 platform fee · network fee under $0.01</span>
+          <span class="row">Scroll <svg class="i xs"><use href="#i-down"/></svg></span>
         </div>
       </div>
-      <div class="promises">
-        <div><span class="pic"><svg class="i"><use href="#i-shield"/></svg></span><div><b>Freedit never holds your money</b><p>Every payment goes straight from the client's wallet to the editor's.</p></div></div>
-        <div><span class="pic"><svg class="i"><use href="#i-hash"/></svg></span><div><b>The exact file you approved</b><p>Proven by its SHA-256 fingerprint, recorded on Arc.</p></div></div>
-        <div><span class="pic"><svg class="i"><use href="#i-users"/></svg></span><div><b>No middleman, no AI judge</b><p>The editor keeps the file and the client keeps the money until payment.</p></div></div>
+
+      <!-- Sheet 2: problem -->
+      <div class="lx-sheet">
+        <div class="lx-label"><span class="tc2">00:02</span><span class="rule"></span>The problem</div>
+        <p class="lx-statement">Editors do "one last change" <em>for free, again and again.</em> Clients pay up front and get a file that <em>isn't the one they approved.</em> Nobody trusts the handoff.</p>
+        <div class="lx-cols2">
+          <div><b>Editors</b> deliver the final file, then the client goes quiet. Revision seven was never part of the price.</div>
+          <div><b>Clients</b> pay before seeing the final file, then can't tell whether it's really the version they signed off on.</div>
+        </div>
       </div>
-      <div class="land-foot">
-        <span>Built on Arc. Fees: $0 to Freedit; the network fee is under $0.01.</span>
-        <span class="row">Contract <a class="link mono">0xC82a…4895 <svg class="i xs"><use href="#i-ext"/></svg></a><span class="faint">· Arc Testnet</span></span>
+
+      <!-- Sheet 3: how it works -->
+      <div class="lx-sheet">
+        <div class="lx-label"><span class="tc2">00:03</span><span class="rule"></span>How it works</div>
+        <h2 class="lx-h">Four steps.<br>Nothing held.</h2>
+        <div class="lx-steps">
+          <div><div class="lx-num">01</div><b>Set the terms</b><p>Price, free revisions and the fee for each extra one. Share one link with your client.</p></div>
+          <div><div class="lx-num">02</div><b>Upload a version</b><p>A watermarked preview to watch, and the full file kept private. Its fingerprint goes on Arc.</p></div>
+          <div><div class="lx-num">03</div><b>Review and revise</b><p>Free revisions first. After that, each change request pays the editor on the spot.</p></div>
+          <div><div class="lx-num">04</div><b>Approve and unlock</b><p>The client pays the editor directly and the final file unlocks. It must match the fingerprint.</p></div>
+        </div>
       </div>
+
+      <!-- Sheet 4: proof (dark in both themes) -->
+      <div class="lx-sheet proof">
+        <div class="lx-label" style="color:#8b8b95"><span class="tc2" style="color:#ededf0">00:04</span><span class="rule"></span>The proof</div>
+        <div style="display:grid; grid-template-columns: 1fr 1.05fr; gap:48px; align-items:start">
+          <div>
+            <h2 class="lx-h">The file you approved.<br>Byte for byte.</h2>
+            <p style="color:#b6b6be; font-size:16px; line-height:1.55; margin:22px 0 26px; max-width:440px">Every version's SHA-256 fingerprint is written to Arc when it's uploaded. After paying, your browser fingerprints the download and compares. Change one frame and it won't match.</p>
+            <div class="row" style="gap:28px; font-size:13px">
+              <div><div style="color:#8b8b95">Freedit contract balance</div><div style="font-size:22px; font-weight:600; letter-spacing:-.02em; color:#ededf0" class="num">$0.00 <span style="font-size:13px; font-weight:500; color:#8b8b95">always</span></div></div>
+              <div><div style="color:#8b8b95">Platform fee</div><div style="font-size:22px; font-weight:600; letter-spacing:-.02em; color:#ededf0" class="num">$0.00</div></div>
+            </div>
+          </div>
+          <div class="lx-log">
+            <div style="margin-bottom:8px; color:#8b8b95"><i class="dot" style="--c:#3ecf8e; margin-right:8px"></i>freedit · project #12 · arc testnet</div>
+            <div><span class="ev">ProjectCreated</span>$200.00 · 1 free · then $15.00</div>
+            <div><span class="ev">VersionSubmitted</span>V1 · 5c1e…a04b</div>
+            <div><span class="ev">RevisionRequested</span>#1 · free</div>
+            <div><span class="ev">VersionSubmitted</span>V2 · 03ab…77f1</div>
+            <div><span class="ev">RevisionRequested</span>#2 · <span class="hl">$15.00 → editor</span></div>
+            <div><span class="ev">VersionSubmitted</span>V3 · 9f2c…e1d0</div>
+            <div><span class="ev">Paid</span><span class="hl">$200.00 → editor</span> · tx 0x5e81…c02a</div>
+            <div class="ok" style="margin-top:6px">✓ download sha-256 = 9f2c…e1d0 · match</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sheet 5: why -->
+      <div class="lx-sheet">
+        <div class="lx-label"><span class="tc2">00:05</span><span class="rule"></span>Why Freedit</div>
+        <div class="lx-rows">
+          <div><span class="n">01</span><span class="t">Holds nothing</span><p>Payments go wallet to wallet in one transaction. The contract's balance is always $0.</p><span class="faint"><svg class="i lg"><use href="#i-shield"/></svg></span></div>
+          <div><span class="n">02</span><span class="t">Paid revisions</span><p>Free ones first. After that, each change request pays the editor on the spot.</p><span class="faint"><svg class="i lg"><use href="#i-rev"/></svg></span></div>
+          <div><span class="n">03</span><span class="t">Pay to unlock</span><p>Clients watch a watermarked preview. The full-quality file stays private until they pay.</p><span class="faint"><svg class="i lg"><use href="#i-lock"/></svg></span></div>
+          <div><span class="n">04</span><span class="t">Fingerprinted</span><p>Each version's SHA-256 is recorded on Arc, so the delivery is provably the approved cut.</p><span class="faint"><svg class="i lg"><use href="#i-hash"/></svg></span></div>
+          <div><span class="n">05</span><span class="t">No middleman</span><p>No escrow agent, no AI judge. The editor keeps the file and the client keeps the money until they swap.</p><span class="faint"><svg class="i lg"><use href="#i-users"/></svg></span></div>
+          <div><span class="n">06</span><span class="t">USDC as gas</span><p>No ETH and no extra token. Network fees are under one cent.</p><span class="faint"><svg class="i lg"><use href="#i-wallet"/></svg></span></div>
+        </div>
+      </div>
+
+      <!-- Sheet 6: not an escrow -->
+      <div class="lx-sheet">
+        <div class="lx-label"><span class="tc2">00:06</span><span class="rule"></span>Not an escrow</div>
+        <h2 class="lx-h">Nobody holds the money.<br>Not even us.</h2>
+        <table class="lx-cmp">
+          <tr><th></th><th>Escrow apps</th><th>Freedit</th></tr>
+          <tr><td>Who holds the money</td><td>A contract holds it until someone releases it</td><td class="us">Nobody. The client pays the editor directly</td></tr>
+          <tr><td>Who settles a dispute</td><td>An arbiter or an AI agent decides</td><td class="us">Each side keeps what it controls until they swap</td></tr>
+          <tr><td>Revisions</td><td>Not part of the deal</td><td class="us">Free ones, then paid on the spot</td></tr>
+          <tr><td>The final file</td><td>Delivered before the money moves</td><td class="us">Locked until paid, then fingerprint-checked</td></tr>
+        </table>
+      </div>
+
+      <!-- Sheet 7: call to action -->
+      <div class="lx-sheet cta">
+        <div class="lx-label" style="color:rgba(255,255,255,.75); margin-top:24px"><span class="tc2" style="color:#fff">00:07</span><span class="rule"></span>Get started</div>
+        <h2 class="lx-cta">Stop chasing invoices.<br>Start shipping cuts.</h2>
+        <div class="between" style="margin-top:40px">
+          <span class="row" style="gap:16px"><span class="lx-round"><svg class="i lg"><use href="#i-arrow"/></svg></span><span style="font-size:18px; font-weight:500">Create a project</span></span>
+          <a class="row" style="color:#fff; gap:6px; text-decoration:none">See the live mainnet example <svg class="i sm"><use href="#i-ext"/></svg></a>
+        </div>
+        <div class="lx-foot">
+          <span>Freedit © 2026 · Built for Arc Microgrants</span>
+          <span class="row" style="gap:20px"><a>Projects</a><a>New project</a><a>GitHub ↗</a><a>Contract ↗</a></span>
+        </div>
+      </div>
+
     </div></div>
     <div class="notes">
-      <div><b>What's here:</b> a headline, one sentence, one main button, and a real preview of the product instead of feature cards. The three promises sit in one quiet line under it, with the contract address and an explorer link as proof.</div>
-      <div><b>Later:</b> the contract link switches to the mainnet address after Phase 6, and "See a real paid project" opens the live mainnet receipt (screen 7). <span class="annot">The preview card is a static picture of screen 5, not a live widget.</span></div>
+      <div><b>Borrowed from heldby:</b> stacked rounded sections on a black frame, very large tight headlines, numbered chapters, a live log panel, a bold coloured closing section. <b>Freedit's own:</b> blue instead of red, no mascot, chapters numbered as video timecodes (00:02, 00:03…), a timeline in the hero that tells the whole story (versions → paid changes → paid → unlocked), and a "Not an escrow" comparison that shows judges the difference.</div>
+      <div><b>Motion (build):</b> sections rise in slightly on scroll and the blue playhead slides along the hero timeline to "Paid". Nothing loops, and it all switches off for people who turn on "reduce motion". <b>Real data:</b> the log panel and the contract link read the live contract once the example project exists. <span class="annot">Section 6 is optional; drop it if you'd rather not compare.</span></div>
     </div>
   </section>
 

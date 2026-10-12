@@ -39,7 +39,7 @@ _Last updated: 2026-10-12. **Phase 1 (contract + tests) and Phase 2 (testnet dep
 - [ ] YOU: B9–B13 (GitHub, X, DoraHacks, Vercel, Supabase)
 - [ ] YOU: B15 (demo video files: 3 versions, preview + full, each under 50 MB)
 - [ ] YOU: OK `@tanstack/react-query` and `@noble/hashes` (SETUP B8)
-- [ ] YOU: review **v2** of `docs/mockups/index.html` (light + dark, redone 10-12 at your request) and reply "approved", or tell me what to change. Also pick headline A or B.
+- [ ] YOU: review **v3** of `docs/mockups/index.html` (light + dark; landing redone in a heldby-inspired editorial style, 10-12) and reply "approved", or tell me what to change. Also: headline A or B, keep blue, keep section 6 "Not an escrow"?
 
 ## Addresses (public)
 | Role | Address |
