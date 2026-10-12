@@ -1,31 +1,45 @@
 # STATUS
 
-_Last updated: 2026-10-12, Phase 1 (contract + tests): code written, tests not yet run. As of 10-12, git, WSL and Arc Foundry are still not installed._
+_Last updated: 2026-10-12. **Phase 1 (contract + tests) is done**: 41/41 tests pass, including the Arc Testnet fork. Next: Phase 2 (testnet deploy), which is waiting on YOU: A1–A5._
 
 ## Done
 - Read and verified the Arc docs: chain IDs, RPCs, USDC address and decimals, 20 gwei floor, zero-address rule, Memo, Arc Foundry install (see CLAUDE.md → Arc facts)
-- `SETUP.md` checklist (S0–S15)
+- `SETUP.md` checklist (A1–A11, B1–B16)
 - `contracts/src/Freedit.sol`: the contract, no custody, no admin
-- Tests: 30+ unit tests covering every required case, a fuzz test on fee accounting, 3 invariants (zero custody, exact editor income, conservation), 3 Arc-fork tests (decimals, full flow with real USDC, blocklisted editor)
+- Tests: 35 unit/fuzz, 3 invariants (zero custody, exact editor income, conservation), 3 Arc-fork tests (decimals, full flow with real USDC, blocklisted editor)
 - `contracts/script/Deploy.s.sol` (refuses non-Arc chains)
 - `CLAUDE.md` (Arc facts, design, decisions), `.gitignore`
 - `docs/mockups/` wireframes for all 7 pages (for approval)
+- **10-12** Environment checked: project at `C:\Users\athar\Documents\DEV\freedit` (outside OneDrive), Git 2.56 with identity set, Node 24.20, WSL 2 Ubuntu, Arc Foundry v0.8.0-2 (`arc-forge 1.7.1-dev`) in `~/.local/bin`
+- **10-12** `git init` on `main`, baseline commit, `.gitattributes` (LF everywhere)
+- **10-12** `arc-forge soldeer install` (forge-std 1.16.2, OpenZeppelin 5.6.1) → `soldeer.lock` committed
+- **10-12** `arc-forge build`: clean (one lint note on a test mock, intentional)
+- **10-12** `arc-forge test`: **38/38 pass**. `ARC_FORK=true` fork tests: **3/3 pass**
+- **10-12** Fixed a silent test gap: the fork tests need `network = "arc"` in `foundry.toml` (now set). Without it the real USDC transfer reverted for an unrelated reason, and the blocklist test passed anyway because it accepted any revert. It now matches Arc's exact `"Blocked address"` reason, and a negative control proves it fails when Arc mode is off. See CLAUDE.md D14.
+- **10-12** Deploy script dry run on Arc Testnet: works, ≈2.0M gas ≈ $0.10 USDC. Nothing broadcast.
+- **10-12** Mainnet explorer `https://explorer.arc.io/api` probed: live Blockscout, same API as testnet
+- **10-12** Circle docs MCP (`circle`) answers; it's configured in WSL Claude Code only
 
 ## Next
-1. Once Arc Foundry is ready: `arc-forge soldeer install`, then `arc-forge test`. Fix anything that fails; run the fork tests.
-2. Phase 2: testnet deploy and explorer verification (you run the deploy command).
-3. Phase 3: frontend, after you approve the mockups.
+1. **Phase 2: testnet deploy** (as soon as A4 + A5 are done). YOU run this in the Ubuntu terminal; it asks for the keystore password:
+   ```bash
+   cd /mnt/c/Users/athar/Documents/DEV/freedit/contracts
+   arc-forge script script/Deploy.s.sol --rpc-url arc_testnet --account deployer --broadcast \
+     --verify --verifier blockscout --verifier-url https://explorer.testnet.arc.io/api/
+   ```
+   Then paste me the `Freedit:` address line. ME: record it in CLAUDE.md and check verification on the explorer.
+2. Phase 3: frontend, after you approve the mockups and the two extra packages.
 
 ## Blockers
-- Arc Foundry is not installed (needs WSL). Tests can't run until SETUP B4 and B5 are done.
-- git is not installed (SETUP B2).
-- Schedule: about 1 day behind the Oct 11 plan. Critical path: B4/B5 (tests → testnet deploy) and A6 (mainnet USDC).
+- Phase 2 needs the deployer keystore (A4) and ~$0.10 of testnet USDC on it (A5).
+- Phase 3 needs mockup approval + OK on `@tanstack/react-query` and `@noble/hashes`.
+- Schedule: about 1 day behind the Oct 11 plan. Critical path: A4/A5 → testnet deploy, and A6 (mainnet USDC).
 
 ## YOU: actions pending
-(SETUP.md was reorganized on 10-12: Part 1 = Arc `A1–A11`, Part 2 = everything else `B1–B16`)
-- [ ] YOU: B1 (move the folder out of OneDrive), right after this turn
-- [ ] YOU: B2 (git), B4 (WSL), B5 (Arc Foundry) → then tell me "arc-forge ready"
-- [ ] YOU: A1–A5 (two wallets, Arc networks, deployer keystore, faucet) → send me the 3 addresses
+- [ ] YOU: delete the old OneDrive copy `C:\Users\athar\OneDrive\Documents\CLAUDE\ARC\freedit` once you've confirmed the DEV folder opens fine (it was identical on 10-12, and keeping two copies invites edits to the wrong one)
+- [ ] YOU: A1–A3 (two wallets, Arc networks)
+- [ ] YOU: A4 deployer keystore (Ubuntu terminal): `mkdir -p ~/.foundry/keystores && arc-cast wallet new ~/.foundry/keystores deployer` → then `arc-cast wallet address --account deployer`
+- [ ] YOU: A5 faucet (Editor, Client, deployer) → send me the 3 addresses
 - [ ] YOU: A6–A7 (mainnet USDC from India, then split it): start today
 - [ ] YOU: B9–B13 (GitHub, X, DoraHacks, Vercel, Supabase)
 - [ ] YOU: B15 (demo video files: 3 versions, preview + full, each under 50 MB)

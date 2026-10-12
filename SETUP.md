@@ -9,10 +9,9 @@ Every action you take starts with **YOU:**, so you can search for it. **ME:** me
 Never paste a private key, recovery phrase or password into chat. Addresses are public, so sharing those is fine.
 
 ## Order for today (Oct 12)
-We're about a day behind, and the critical path is Arc Foundry plus mainnet USDC:
-1. **B1** move the folder out of OneDrive (right after my turn ends), then open Claude Code in `C:\dev\freedit`
-2. **B2** git → **B4** WSL (reboot) → **B5** Arc Foundry → tell me **"arc-forge ready"** (unblocks the tests and the testnet deploy)
-3. **A1–A3** wallets and networks → **A4** deployer keystore → **A5** faucet
+We're about a day behind, and the critical path is now the testnet deploy plus mainnet USDC:
+1. ~~B1 move out of OneDrive~~ ✓ (now at `C:\Users\athar\Documents\DEV\freedit`) · ~~B2 git~~ ✓ · ~~B4 WSL~~ ✓ · ~~B5 Arc Foundry~~ ✓ · ~~B7 tests~~ ✓ 41/41 pass
+2. → **next:** **A1–A3** wallets and networks → **A4** deployer keystore → **A5** faucet → Phase 2 testnet deploy (command in STATUS.md)
 4. **Start A6 (mainnet USDC) today**. Exchange withdrawals and KYC can take hours.
 5. B9–B13 accounts, whenever you're waiting on something
 
@@ -105,16 +104,12 @@ Why a keystore instead of a plaintext `.env`: it's encrypted, lives in Ubuntu's 
 
 # Part 2: Everything else (tools, dependencies, accounts, storage, hosting, demo)
 
-### B1: Move the project out of OneDrive (5 min), right after my turn ends
-Why: OneDrive will try to upload `node_modules` (100k+ files) and lock files during `npm install` / `next build`, which causes random `EPERM` errors.
-- [ ] YOU: close this Claude session, then in PowerShell:
-  ```powershell
-  New-Item -ItemType Directory -Force C:\dev
-  Move-Item "C:\Users\athar\OneDrive\Documents\CLAUDE\ARC\freedit" C:\dev\freedit
-  ```
-- [ ] YOU: open a new Claude Code session in `C:\dev\freedit`. CLAUDE.md, STATUS.md and this file carry all the context over.
+### B1: Move the project out of OneDrive ✓ done 10-12
+It ended up at `C:\Users\athar\Documents\DEV\freedit` (WSL: `/mnt/c/Users/athar/Documents/DEV/freedit`), not `C:\dev\freedit`. That's fine; it isn't synced. The OneDrive copy still exists. Delete it once you're happy (STATUS.md).
+Why it had to move: OneDrive tries to upload `node_modules` (100k+ files) and lock files during `npm install` / `next build`, which causes random `EPERM` errors.
+- [x] Copied out of OneDrive. Open Claude Code in `C:\Users\athar\Documents\DEV\freedit` from now on.
 
-### B2: Git for Windows (3 min)
+### B2: Git for Windows ✓ done (2.56.0, identity set; repo initialized on `main` 10-12)
 - [ ] YOU: `winget install --id Git.Git -e --source winget`
 - [ ] YOU: reopen the terminal → `git --version`
 - [ ] YOU: set your identity. For a private email, use GitHub's noreply address (GitHub → Settings → Emails):
@@ -126,14 +121,14 @@ Why: OneDrive will try to upload `node_modules` (100k+ files) and lock files dur
 ### B3: Node.js (done ✓)
 Node v24.20.0 and npm 11.19.0 are installed. Next.js 16 needs Node ≥ 20.9.
 
-### B4: WSL + Ubuntu (15–25 min including reboot)
+### B4: WSL + Ubuntu ✓ done (WSL 2, user `athar`)
 Why: Arc Foundry ships only Linux and macOS binaries; the Arc docs say Windows must use WSL. Virtualization is already on, so this will work.
 - [ ] YOU: PowerShell **as Administrator** → `wsl --install -d Ubuntu-24.04`
 - [ ] YOU: reboot → Ubuntu opens → choose a Linux username and password (the `sudo` password, so keep it)
 - [ ] YOU: normal PowerShell → `wsl -l -v` → should show `Ubuntu-24.04`, VERSION `2`
 - Docs: https://learn.microsoft.com/en-us/windows/wsl/install
 
-### B5: Arc Foundry inside Ubuntu (5 min)
+### B5: Arc Foundry inside Ubuntu ✓ done (`~/.local/bin/arc-{forge,cast,anvil}`, reports `1.7.1-dev`)
 Release **v0.8.0-2** (Sep 18, 2026), https://github.com/circlefin/arc-foundry/releases, x86_64 build.
 - [ ] YOU (Ubuntu terminal):
   ```bash
@@ -154,11 +149,11 @@ Release **v0.8.0-2** (Sep 18, 2026), https://github.com/circlefin/arc-foundry/re
   If `mv` says "No such file", run `ls -R` and paste me the output.
 - [ ] YOU: tell me **"arc-forge ready"**
 
-### B6: Arc docs MCP for Claude Code (2 min, optional)
-- [ ] YOU: `claude mcp add --transport http arc-docs https://docs.arc.io/mcp`, then start a new Claude session
-- If `claude` isn't recognized, skip this. I read the same docs.arc.io pages directly.
+### B6: Docs MCP for Claude Code (optional)
+- Done differently: the Circle docs MCP `circle` (`https://api.circle.com/v1/codegen/mcp`) is set up in **WSL** Claude Code. It covers developers.circle.com, not the Arc Foundry pages, so I still read docs.arc.io directly for those.
+- Optional: to also have it in the Windows desktop app, run once in PowerShell: `claude mcp add --transport http --scope user circle https://api.circle.com/v1/codegen/mcp` (that's Windows' config, so it isn't a duplicate of the WSL one). Not needed for the build.
 
-### B7: Contract dependencies (ME, automatic after B5)
+### B7: Contract dependencies ✓ done 10-12 (41/41 tests pass)
 - ME: `arc-forge soldeer install` → `forge-std 1.16.2`, `@openzeppelin-contracts 5.6.1` (pinned in `contracts/foundry.toml`)
 - ME: `arc-forge test` → I report pass/fail
 

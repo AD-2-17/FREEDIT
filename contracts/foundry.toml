@@ -7,6 +7,10 @@ libs = ["dependencies"]
 solc_version = "0.8.30"
 # Arc targets the Osaka hard fork, a superset of Prague (docs: evm-differences).
 evm_version = "prague"
+# Turns on Arc's precompiles (native USDC, blocklist) in tests, forks and scripts. Without it, the real
+# USDC's transferFrom calls the blocklist precompile at 0x1800…0001, which burns all the gas and reverts.
+# Same as `--network arc` on the command line. Found by testing on 10-12; the docs.arc.io pages don't mention it.
+network = "arc"
 optimizer = true
 optimizer_runs = 10000
 remappings = [

@@ -75,6 +75,9 @@ contract FreeditArcForkTest is Test {
 
     /// Arc enforces its blocklist on every USDC transfer, so paying a blocklisted editor fails
     /// and the project stays unpaid (the file stays locked).
+    /// The reason string is what Arc Testnet returns today (checked with `arc-cast call --trace` on 10-12).
+    /// Matching it exactly matters: without `network = "arc"` in foundry.toml the same call reverted for an
+    /// unrelated reason (the precompile wasn't simulated), and a bare expectRevert() hid that.
     function test_Fork_PaymentToBlocklistedEditorReverts() public onlyFork {
         vm.deal(client, 1_000 ether);
 
@@ -85,7 +88,7 @@ contract FreeditArcForkTest is Test {
 
         vm.startPrank(client);
         USDC.approve(address(freedit), type(uint256).max);
-        vm.expectRevert();
+        vm.expectRevert(bytes("Blocked address"));
         freedit.approveAndPay(id, H1);
         vm.stopPrank();
 

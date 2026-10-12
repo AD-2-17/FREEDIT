@@ -23,7 +23,8 @@ Differentiator vs heldby (heldby.vercel.app): heldby holds funds and settles dis
 - Run a self security review of the contract and API routes before the mainnet deploy.
 
 ## Arc facts
-Verified 2026-10-11 by reading docs.arc.io pages directly (the Arc docs MCP isn't installed in this session yet).
+Verified 2026-10-11 by reading docs.arc.io pages directly; rows marked "tested 10-12" were checked against Arc Testnet/Mainnet with Arc Foundry.
+Docs MCP: `circle` (`https://api.circle.com/v1/codegen/mcp`, user scope) is configured in **WSL** Claude Code only, not in the Windows desktop app. It indexes developers.circle.com (CCTP, Gateway, StableFX…); a search for Arc Foundry returned nothing relevant, so Arc Foundry facts come from docs.arc.io (`/llms.txt` lists the pages).
 
 | Fact | Status | Source |
 |---|---|---|
@@ -49,9 +50,12 @@ Verified 2026-10-11 by reading docs.arc.io pages directly (the Arc docs MCP isn'
 | EURC mainnet `0xbEf5f6d51CB62b58e6A8f77868681825C6fe21c1`, testnet `0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a` (6 decimals) | ✅ | contract-addresses |
 | USDC supports EIP-3009 `transferWithAuthorization`; EIP-712 domain name `"USDC"`, version `"2"` (testnet) | ✅ | eip-3009-relayer |
 | USDC supports EIP-2612 `permit` | ❓ not documented | none |
-| Arc Foundry is a fork of Foundry with Arc's precompiles (native USDC, blocklist). Binaries for Linux x86_64/arm64 and macOS arm64 only. **Windows = WSL.** Latest `v0.8.0-2` (2026-09-18), github.com/circlefin/arc-foundry | ✅ | install-arc-foundry, GitHub releases |
+| Arc Foundry is a fork of Foundry with Arc's precompiles (native USDC, blocklist). Binaries for Linux x86_64/arm64 and macOS arm64 only. **Windows = WSL.** Latest `v0.8.0-2` (2026-09-18), github.com/circlefin/arc-foundry. That release reports `forge Version: 1.7.1-dev` (commit `d497bee`) | ✅ | install-arc-foundry, GitHub releases, `arc-forge --version` |
+| **Arc precompiles are off unless `network = "arc"`** (or `--network arc`). Without it, the real USDC's `transferFrom` calls the blocklist precompile `0x1800…0001`, burns ~1B gas and reverts with no data. Set in `foundry.toml`. The `--network` CLI flag does **not** override the toml value; `FOUNDRY_NETWORK=<x>` does | ✅ tested 10-12 | not in the docs (install / troubleshoot pages only show `--fork-url`) |
+| Blocklist revert reason in the EVM is `"Blocked address"` (the troubleshoot page's example shows "Blocklisted address"). The live RPC rejects such calls before execution: `-32603 Blocked address` | ✅ tested 10-12 | `arc-cast call --trace` on testnet |
+| Deploying Freedit ≈ 2.0M gas ≈ $0.10 USDC at 51 gwei (testnet simulation) | ✅ tested 10-12 | `arc-forge script` dry run |
 | Testnet contract verification: `--verifier blockscout --verifier-url https://explorer.testnet.arc.io/api/` | ✅ | deploy-on-arc |
-| Mainnet verification URL `https://explorer.arc.io/api/` | ❓ assumed by analogy | none |
+| Mainnet verification URL `https://explorer.arc.io/api/` | ⚠️ endpoint is live Blockscout (backend v11.3.3, `/api` answers like testnet); not yet used for a real verification | probed 10-12 |
 
 ## Contract design (`contracts/src/Freedit.sol`)
 - Constructor: `Freedit(IERC20 usdc)`. On Arc, pass `0x3600…0000`. Immutable. No owner, admin, upgrade path, `receive()` or withdraw.
@@ -63,6 +67,7 @@ Verified 2026-10-11 by reading docs.arc.io pages directly (the Arc docs MCP isn'
 - Events: `ProjectCreated(id, editor, client, price, freeRevisions, revisionFee)`, `VersionSubmitted(id, version, fileHash, previewURI)`, `RevisionRequested(id, n, paidFee, noteHash, version)`, `Paid(id, client, editor, amount, version, fileHash)`.
 - Checks-effects-interactions on both payment paths. Events are emitted before the transfer.
 - Tests: `test/Freedit.t.sol` (unit + fuzz), `test/FreeditInvariant.t.sol` (handler-based invariants: zero custody, exact editor income, conservation), `test/FreeditArcFork.t.sol` (Arc Testnet fork with real USDC: decimals, full flow, blocklist; opt-in with `ARC_FORK=true`).
+- Test status (10-12): 38/38 offline pass (35 unit/fuzz at 1000 runs, 3 invariants at 256×64), 3/3 fork pass. Negative control: with `FOUNDRY_NETWORK=ethereum` the full-flow and blocklist fork tests fail, as they should.
 
 ## Deployed addresses
 | Network | Freedit | Deploy tx | Verified |
@@ -78,9 +83,10 @@ web/         Next.js app (Phase 3)
 docs/mockups Wireframes for approval
 ```
 
-## Commands (run inside WSL Ubuntu; the repo lives on the Windows drive under /mnt/c/…)
+## Commands (run inside WSL Ubuntu; the repo lives on the Windows drive)
+Repo: `C:\Users\athar\Documents\DEV\freedit` = `/mnt/c/Users/athar/Documents/DEV/freedit` (outside OneDrive; git, branch `main`). The plan said `C:\dev\freedit`; it ended up here instead.
 ```bash
-cd /mnt/c/<path-to-repo>/contracts
+cd /mnt/c/Users/athar/Documents/DEV/freedit/contracts
 arc-forge soldeer install          # forge-std + OpenZeppelin from foundry.toml [dependencies]
 arc-forge build
 arc-forge test -vv                 # unit + fuzz + invariant (offline)
@@ -89,7 +95,8 @@ ARC_FORK=true arc-forge test --match-contract FreeditArcFork -vv   # Arc Testnet
 arc-forge script script/Deploy.s.sol --rpc-url arc_testnet --account deployer --broadcast \
   --verify --verifier blockscout --verifier-url https://explorer.testnet.arc.io/api/
 ```
-From Windows, Claude runs these as `wsl -e bash -lc "cd '/mnt/c/...' && arc-forge test"`.
+From Windows, Claude runs these as `wsl -e bash -lc "cd /mnt/c/Users/athar/Documents/DEV/freedit/contracts && arc-forge test"`.
+Git runs from Windows only (D2). `.gitattributes` pins LF so WSL and Windows agree.
 
 ## Decisions log
 - **D1 (10-11) Arc Foundry via WSL.** No native Windows build exists, and the docs require WSL. Plain Foundry can't simulate Arc's USDC precompile or blocklist, which the fork tests need.
@@ -104,6 +111,8 @@ From Windows, Claude runs these as `wsl -e bash -lc "cd '/mnt/c/...' && arc-forg
 - **D10 (10-11) Payment = ERC-20 `approve` + Freedit call (2 txs).** EIP-2612 permit isn't documented for Arc USDC. EIP-3009 `transferWithAuthorization` was rejected: the signed authorization could be submitted straight to USDC by anyone, paying the editor without marking the project paid. Possible later UX upgrade: EIP-5792 batched calls where the wallet supports them.
 - **D11 (10-11) Storage = Supabase, private bucket for full files.** The free plan caps uploads at 50 MB per file, which is fine for demo clips. Stated as a limitation; R2 is the production path.
 - **D12 (10-11) Contract addresses are committed** in `web/src/config/deployments.ts` (they're public), not kept in env vars.
+- **D14 (10-12) `network = "arc"` in `foundry.toml`.** Arc Foundry only simulates Arc's precompiles with it, and the fork tests silently tested the wrong thing without it (see Arc facts). The blocklist fork test now matches the exact `"Blocked address"` reason instead of any revert. Never remove this line.
+- **D15 (10-12) `soldeer.lock` is committed.** It pins the dependency zips by checksum, so `soldeer install` is reproducible.
 - **D13 (pending) Memo.** It needs no contract change, since CallFrom keeps the client EOA as `msg.sender`. Decide in Phase 5 whether the UI wraps pay/revision calls in `Memo.memo(...)` for EOAs (fallback: direct call).
 
 ## Design rules (strict)
