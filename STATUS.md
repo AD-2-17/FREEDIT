@@ -39,7 +39,7 @@ _Last updated: 2026-10-12. **Phase 1 (contract + tests) and Phase 2 (testnet dep
 - [ ] YOU: B9–B13 (GitHub, X, DoraHacks, Vercel, Supabase)
 - [ ] YOU: B15 (demo video files: 3 versions, preview + full, each under 50 MB)
 - [ ] YOU: OK `@tanstack/react-query` and `@noble/hashes` (SETUP B8)
-- [ ] YOU: review `docs/mockups/index.html` and approve it, or tell me what to change
+- [ ] YOU: review **v2** of `docs/mockups/index.html` (light + dark, redone 10-12 at your request) and reply "approved", or tell me what to change. Also pick headline A or B.
 
 ## Addresses (public)
 | Role | Address |
