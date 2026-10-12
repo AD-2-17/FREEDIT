@@ -1,6 +1,6 @@
 # STATUS
 
-_Last updated: 2026-10-12. **Phase 1 (contract + tests) is done**: 41/41 tests pass, including the Arc Testnet fork. Next: Phase 2 (testnet deploy), which is waiting on YOU: A1–A5._
+_Last updated: 2026-10-12. **Phase 1 (contract + tests) is done**: 41/41 tests pass, including the Arc Testnet fork. A1–A5 done. Next: Phase 2 (testnet deploy), which YOU run now._
 
 ## Done
 - Read and verified the Arc docs: chain IDs, RPCs, USDC address and decimals, 20 gwei floor, zero-address rule, Memo, Arc Foundry install (see CLAUDE.md → Arc facts)
@@ -31,15 +31,13 @@ _Last updated: 2026-10-12. **Phase 1 (contract + tests) is done**: 41/41 tests p
 2. Phase 3: frontend, after you approve the mockups and the two extra packages.
 
 ## Blockers
-- Phase 2 needs the deployer keystore (A4) and ~$0.10 of testnet USDC on it (A5).
 - Phase 3 needs mockup approval + OK on `@tanstack/react-query` and `@noble/hashes`.
 - Schedule: about 1 day behind the Oct 11 plan. Critical path: A4/A5 → testnet deploy, and A6 (mainnet USDC).
 
 ## YOU: actions pending
 - [ ] YOU: delete the old OneDrive copy `C:\Users\athar\OneDrive\Documents\CLAUDE\ARC\freedit` once you've confirmed the DEV folder opens fine (it was identical on 10-12, and keeping two copies invites edits to the wrong one)
-- [ ] YOU: A1–A3 (two wallets, Arc networks)
-- [ ] YOU: A4 deployer keystore (Ubuntu terminal): `mkdir -p ~/.foundry/keystores && arc-cast wallet new ~/.foundry/keystores deployer` → then `arc-cast wallet address --account deployer`
-- [ ] YOU: A5 faucet (Editor, Client, deployer) → send me the 3 addresses
+- [x] A1–A5 done 10-12 (wallets, keystore `deployer`, faucet). Addresses below.
+- [ ] YOU: Phase 2 testnet deploy (command under Next)
 - [ ] YOU: A6–A7 (mainnet USDC from India, then split it): start today
 - [ ] YOU: B9–B13 (GitHub, X, DoraHacks, Vercel, Supabase)
 - [ ] YOU: B15 (demo video files: 3 versions, preview + full, each under 50 MB)
@@ -49,6 +47,9 @@ _Last updated: 2026-10-12. **Phase 1 (contract + tests) is done**: 41/41 tests p
 ## Addresses (public)
 | Role | Address |
 |---|---|
-| deployer | _send me after A4_ |
-| Freedit Editor (demo) | _send me after A1_ |
-| Freedit Client (demo) | _send me after A2_ |
+| deployer | `0x1037729af7ccCFFD038005acA26aaa2F5DAA0866` |
+| Freedit Editor (demo) | `0xa8AeBCFB34a669BFF1127D10f97C36C5d992fB8B` |
+| Freedit Client (demo) | `0x2C1c06E6Cf809Ce06eDC383dAe97BF15fe5986De` |
+
+Checked 10-12 (read-only): checksums valid, all plain wallets (EOAs, so Memo works later), none blocklisted, nonce 0.
+Testnet: $20.00 each. Mainnet: $0.00 each (waiting on A6).
