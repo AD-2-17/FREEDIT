@@ -1,6 +1,6 @@
-import { createConfig, http } from "wagmi";
+import { createConfig, fallback, http } from "wagmi";
 import { injected, mock } from "wagmi/connectors";
-import { chain } from "./network";
+import { chain, rpcUrls } from "./network";
 
 /**
  * Dev-only wallets for the local arc-anvil fork. Anvil's default accounts #2 and #3 (#1 is on Arc's test
@@ -19,7 +19,8 @@ export const wagmiConfig = createConfig({
   chains: [chain],
   // injected() + EIP-6963 discovery covers MetaMask, Rabby and other browser wallets.
   connectors: [injected(), ...devConnectors],
-  transports: { [chain.id]: http(chain.rpcUrls.default.http[0]) },
+  // Reads go to Arc's RPC; if it fails (blocked, rate-limited, down), the docs' other node providers take over.
+  transports: { [chain.id]: fallback(rpcUrls.map((url) => http(url))) },
   ssr: true,
 });
 

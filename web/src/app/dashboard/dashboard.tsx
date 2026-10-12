@@ -10,7 +10,8 @@ import { WalletButton } from "@/components/wallet";
 import { shortAddress, usd } from "@/lib/format";
 import { mergeMeta, projectTitle, useLocalMeta, useServerMeta, type ProjectMeta } from "@/lib/meta";
 import { network } from "@/lib/network";
-import { earned, freeditAddress, statusOf, useProjectIds, useProjects, type Project } from "@/lib/project";
+import { earned, failureOf, freeditAddress, statusOf, useProjectIds, useProjects, type Project } from "@/lib/project";
+import { readFailure } from "@/lib/tx";
 
 type Row = { id: bigint; p: Project; role: "editor" | "client" };
 type Tab = "all" | "active" | "paid";
@@ -63,6 +64,7 @@ export function Dashboard() {
   }).length;
   const shown = rows.filter((r) => (tab === "all" ? true : tab === "paid" ? r.p.paid : !r.p.paid));
   const loading = idsLoading || (ids.length > 0 && projects.isLoading);
+  const readError = idsError ?? projects.error ?? failureOf(projects.data);
 
   return (
     <div className="page">
@@ -84,11 +86,18 @@ export function Dashboard() {
         ))}
       </div>
 
-      {idsError && <div style={{ marginTop: 16 }}><Notice tone="bad">Couldn&apos;t read your projects from Arc. Check your connection and reload.</Notice></div>}
+      {readError && (
+        <div style={{ marginTop: 16 }}>
+          <Notice tone="bad">
+            Couldn&apos;t read your projects from {network.label}, so this list may be incomplete. Retrying every 10 seconds; check your connection or reload.
+            <span className="muted" style={{ display: "block", fontSize: 12, marginTop: 4 }}>{readFailure(readError)}</span>
+          </Notice>
+        </div>
+      )}
 
       {loading ? (
         <div style={{ display: "grid", gap: 10, marginTop: 16 }}>{[0, 1, 2].map((i) => <div key={i} className="skeleton" style={{ height: 44 }} />)}</div>
-      ) : shown.length === 0 ? (
+      ) : shown.length === 0 && readError ? null : shown.length === 0 ? (
         <div className="empty">
           <b>{rows.length === 0 ? "No projects yet" : "Nothing here"}</b>
           {rows.length === 0 && <p style={{ margin: "0 0 16px" }}>Create one, or ask your editor to create one for this wallet.</p>}

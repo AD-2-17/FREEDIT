@@ -106,6 +106,18 @@ export function explainError(e: unknown): string {
   return "Something went wrong.";
 }
 
+/** Why a read of Arc failed, in a few words ("HTTP 429 from rpc.testnet.arc.io"), for "couldn't load" notices. */
+export function readFailure(e: unknown): string {
+  if (!(e instanceof BaseError)) return e instanceof Error ? e.message : "";
+  const http = e.walk((x) => x instanceof HttpRequestError) as HttpRequestError | null;
+  if (http) {
+    let host = http.url;
+    try { host = new URL(http.url).host; } catch {}
+    return `${http.status ? `HTTP ${http.status}` : http.details || "no answer"} from ${host}`;
+  }
+  return e.shortMessage;
+}
+
 const withDetail = (message: string, detail?: string) =>
   detail && !message.includes(detail) ? `${message} (${detail.length > 160 ? `${detail.slice(0, 160)}…` : detail})` : message;
 

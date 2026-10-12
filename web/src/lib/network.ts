@@ -45,6 +45,8 @@ type NetworkConfig = {
   deployBlock: bigint;
   /** Where the activity feed reads events: the explorer's indexed log API, or plain RPC (local fork). */
   activity: "explorer" | "rpc";
+  /** Node providers listed in docs.arc.io (connect-to-arc), tried in order when the main RPC fails (checked 10-12). */
+  rpcBackups: string[];
 };
 
 const networks: Record<NetworkName, NetworkConfig> = {
@@ -54,6 +56,7 @@ const networks: Record<NetworkName, NetworkConfig> = {
     freedit: "0xC82aB1b65866b43A0F3794ba6d5EAC0a55df4895",
     deployBlock: 66796009n,
     activity: "explorer",
+    rpcBackups: ["https://rpc.blockdaemon.testnet.arc.io", "https://rpc.drpc.testnet.arc.io"],
   },
   mainnet: {
     chain: arcMainnetDocs,
@@ -61,6 +64,7 @@ const networks: Record<NetworkName, NetworkConfig> = {
     freedit: undefined, // set after the Phase 6 mainnet deploy
     deployBlock: 0n,
     activity: "explorer",
+    rpcBackups: ["https://rpc.blockdaemon.mainnet.arc.io", "https://rpc.drpc.mainnet.arc.io", "https://rpc.quicknode.mainnet.arc.io"],
   },
   local: {
     chain: arcLocalFork,
@@ -68,11 +72,14 @@ const networks: Record<NetworkName, NetworkConfig> = {
     freedit: "0xC82aB1b65866b43A0F3794ba6d5EAC0a55df4895", // the fork contains the testnet deployment
     deployBlock: 66796009n,
     activity: "rpc",
+    rpcBackups: [],
   },
 };
 
 export const network = networks[networkName];
 export const chain = network.chain;
+/** Main RPC first (also what a wallet gets when it adds the network), then the backups. */
+export const rpcUrls = [chain.rpcUrls.default.http[0], ...network.rpcBackups];
 
 /** USDC's ERC-20 interface on Arc: same address on both networks, 6 decimals (docs: contract-addresses). */
 export const USDC: Address = "0x3600000000000000000000000000000000000000";

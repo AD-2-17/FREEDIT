@@ -18,7 +18,7 @@ import {
   earned, freeditAddress, nextRevisionCost, paidRevisions, parseId, statusOf, useProject, useVersions,
   type Project, type Version,
 } from "@/lib/project";
-import { revertName } from "@/lib/tx";
+import { readFailure, revertName } from "@/lib/tx";
 import { ChangesSheet, PaySheet } from "./sheets";
 
 export function ProjectView({ idText }: { idText: string }) {
@@ -49,7 +49,9 @@ export function ProjectView({ idText }: { idText: string }) {
     const unknown = revertName(project.error) === "UnknownProject";
     return (
       <Frame crumbs={crumbs}>
-        <Notice tone="bad">{unknown ? `Project #${id} doesn't exist on ${network.label}.` : "Couldn't load this project from Arc. Check your connection and reload."}</Notice>
+        <Notice tone="bad">
+          {unknown ? `Project #${id} doesn't exist on ${network.label}.` : <>Couldn&apos;t load this project from {network.label}. Retrying every 15 seconds; check your connection or reload.{project.error && <span className="muted" style={{ display: "block", fontSize: 12, marginTop: 4 }}>{readFailure(project.error)}</span>}</>}
+        </Notice>
       </Frame>
     );
   }
@@ -61,7 +63,8 @@ export function ProjectView({ idText }: { idText: string }) {
   const clientName = meta.clientName || shortAddress(p.client);
   const vs = (versions.data ?? []).map((r) => r.result as Version | undefined);
   const current = Math.min(view ?? p.version, p.version);
-  const shown = current > 0 ? vs[current - 1] : undefined;
+  // The project itself carries the latest preview, so the newest version still plays if the per-version read fails.
+  const shown = current > 0 ? vs[current - 1] ?? (current === p.version ? { fileHash: p.latestFileHash, submittedAt: 0n, previewURI: p.previewURI } : undefined) : undefined;
   const onLatest = current === p.version;
   const items = activity.data ?? [];
   const paidItem = items.find((a) => a.kind === "paid");
@@ -104,7 +107,7 @@ export function ProjectView({ idText }: { idText: string }) {
           <Player version={shown} paid={p.paid} watermark={meta.editorName ? `Preview · ${meta.editorName}` : "Preview"} />
           {shown && (
             <div className="between wrap" style={{ marginTop: 10, fontSize: 12.5 }}>
-              <span className="muted">V{current} · {dateTime(shown.submittedAt)}{!onLatest && <span className="warn"> · not the latest version</span>}</span>
+              <span className="muted">V{current}{shown.submittedAt > 0n && <> · {dateTime(shown.submittedAt)}</>}{!onLatest && <span className="warn"> · not the latest version</span>}</span>
               <span className="row muted">Fingerprint <span className="mono">{shortHash(shown.fileHash)}</span><CopyButton value={shown.fileHash} label="Copy fingerprint" /></span>
             </div>
           )}

@@ -1,9 +1,9 @@
-import { BaseError, ContractFunctionRevertedError, createPublicClient, http, type Address, type Hex } from "viem";
+import { BaseError, ContractFunctionRevertedError, createPublicClient, fallback, http, type Address, type Hex } from "viem";
 import { freeditAbi } from "@/lib/abi/freedit";
-import { chain, network } from "@/lib/network";
+import { chain, network, rpcUrls } from "@/lib/network";
 
 /** Server-side reads of the Freedit contract. The server trusts Arc, never the browser, for who's who and "paid". */
-export const publicClient = createPublicClient({ chain, transport: http(chain.rpcUrls.default.http[0]) });
+export const publicClient = createPublicClient({ chain, transport: fallback(rpcUrls.map((url) => http(url))) });
 
 export type OnchainProject = {
   editor: Address;
