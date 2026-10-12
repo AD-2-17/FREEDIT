@@ -56,7 +56,8 @@ Docs MCP: `circle` (`https://api.circle.com/v1/codegen/mcp`, user scope) is conf
 | Deploying Freedit: forge estimates 2.0M gas; **actual 1,552,079 gas × 32.5 gwei = $0.0504 USDC** (testnet, 10-12) | ✅ tested 10-12 | testnet deploy receipt |
 | Testnet contract verification: `--verifier blockscout --verifier-url https://explorer.testnet.arc.io/api/` | ✅ used 10-12: "Pass - Verified" after one 15 s retry | deploy-on-arc, our deploy |
 | `eth_getLogs` is capped at **10,000 blocks** per query (testnet and mainnet RPC: "requested range too large"); blocks ≈ 0.5 s | ✅ tested 10-12 | RPC probes |
-| Mainnet verification URL `https://explorer.arc.io/api/` | ⚠️ endpoint is live Blockscout (backend v11.3.3, `/api` answers like testnet); not yet used for a real verification | probed 10-12 |
+| Mainnet verification URL `https://explorer.arc.io/api/` | ⚠️ live Blockscout, but its `/api` answers **every non-browser client** (curl, Foundry UA) with a Cloudflare challenge (403); browsers get 200. Testnet’s API doesn’t. So mainnet verification uses **Sourcify**, which lists Arc Mainnet (5042) and Arc Testnet (supported: true) | probed 10-12 |
+| Mainnet deploy dry run: ≈2.0M gas, est. gas price 40 gwei, ≤ 0.081 USDC; same CREATE address as testnet (`0xC82a…4895`) while the deployer’s mainnet nonce is 0 | ✅ simulated 10-12 | `arc-forge script --sender` |
 
 ## Contract design (`contracts/src/Freedit.sol`)
 - Constructor: `Freedit(IERC20 usdc)`. On Arc, pass `0x3600…0000`. Immutable. No owner, admin, upgrade path, `receive()` or withdraw.
@@ -101,6 +102,10 @@ ARC_FORK=true arc-forge test --match-contract FreeditArcFork -vv   # Arc Testnet
 # Deploy (YOU run this; it asks for the keystore password)
 arc-forge script script/Deploy.s.sol --rpc-url arc_testnet --account deployer --broadcast \
   --verify --verifier blockscout --verifier-url https://explorer.testnet.arc.io/api/
+# Mainnet (YOU): the explorer API blocks CLI clients, so verify through Sourcify
+arc-forge script script/Deploy.s.sol --rpc-url arc_mainnet --account deployer --broadcast --verify --verifier sourcify
+# Dry run, no keys (Claude can run it): --sender 0x1037729af7ccCFFD038005acA26aaa2F5DAA0866 instead of --account/--broadcast
+# Security scripts (web/): fork + `node scripts/dev.mjs local 3000`, then fork-project.mjs create → access-control.mjs <id> unpaid → fork-project.mjs pay <id> → access-control.mjs <id> paid; siwe-attacks.mjs; rpc-relay.mjs <base> [local]. Delete the Supabase rows/files for that id afterwards.
 ```
 From Windows, Claude runs these as `wsl -e bash -lc "cd /mnt/c/Users/athar/Documents/DEV/freedit/contracts && arc-forge test"`.
 Git runs from Windows only (D2). `.gitattributes` pins LF so WSL and Windows agree.

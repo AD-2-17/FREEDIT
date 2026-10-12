@@ -1,6 +1,6 @@
 # STATUS
 
-_Last updated: 2026-10-12. **Phases 1–4 are done.** Contract live and verified on Arc Testnet (`0xC82aB1b65866b43A0F3794ba6d5EAC0a55df4895`); website live at **https://freedit-one.vercel.app** (testnet) with Supabase storage, sign-in, uploads and verified downloads. Next: Phase 5 (YOU run the full flow on the live site with your real wallets), then the security review and the mainnet deploy, which needs mainnet USDC (still $0)._
+_Last updated: 2026-10-12. **Phases 1–5 are done; Phase 6 review is written** (docs/SECURITY-REVIEW.md: contract clean, one medium web finding W-1 that needs no contract change). Waiting on: your "ok to deploy" and mainnet USDC in the deployer. Earlier summary:  Contract live and verified on Arc Testnet (`0xC82aB1b65866b43A0F3794ba6d5EAC0a55df4895`); website live at **https://freedit-one.vercel.app** (testnet) with Supabase storage, sign-in, uploads and verified downloads. Next: Phase 5 (YOU run the full flow on the live site with your real wallets), then the security review and the mainnet deploy, which needs mainnet USDC (still $0)._
 
 ## Done
 - Read and verified the Arc docs: chain IDs, RPCs, USDC address and decimals, 20 gwei floor, zero-address rule, Memo, Arc Foundry install (see CLAUDE.md → Arc facts)
@@ -42,12 +42,14 @@ _Last updated: 2026-10-12. **Phases 1–4 are done.** Contract live and verified
 - **10-12 Bugs from your first live test.** (1) **MetaMask warning on connect:** MetaMask’s site scanner flags every `*.vercel.app` address as a "wallet drainer" (BLOCK, CRITICAL), including names nobody uses; custom domains come back clean. Fix = own domain (SETUP B12c), and the vercel.app address then forwards to it automatically (`next.config.ts`, tested on a production build). Also: the "add network" prompt now uses the registry name "Arc Network Testnet", so MetaMask doesn’t flag a name mismatch. (2) **"HTTP" error after sign-in on Create project:** not reproducible with a plain test wallet on the live site (connect, sign-in, simulation and the wallet’s confirm step all work; your sign-in at 13:45 UTC reached the server fine). Likely cause found afterwards: when the wallet can’t reach Arc through the RPC URL saved in MetaMask, it answers code -32603 and viem reports that as a contract “revert” whose reason is the wallet’s text (e.g. “RPC endpoint returned HTTP client error.”), which the page showed raw. Arc’s RPC itself answers MetaMask-style requests fine. Now the page says “Your wallet couldn’t reach Arc Testnet … check the RPC URL is https://rpc.testnet.arc.io”. Errors also say which step failed ("Signing in didn’t work: …"), split "couldn’t reach Arc" from "your wallet couldn’t reach Arc", keep the technical detail, and log the full error to the console as `[freedit]`.
 - **10-12 Client side couldn’t see projects or the video** (your screenshot: "Couldn’t load this project from Arc"). On Arc everything was right (projects #1 and #2 list your Client wallet; #2 loads with its V1 video in my browser), so the Client profile’s reads of Arc’s RPC were failing, and one failure stuck: the project page stopped polling, and the dashboard showed a failed read as "No projects yet" and never retried. Fix: backup RPC endpoints from the Arc docs (Blockdaemon, dRPC), failed reads retry every 10–15 s, the dashboard shows an error with the cause instead of an empty list, and the newest preview plays from the project record even if the per-version read fails.
 - **10-12 Client still blocked** ("Failed to fetch from rpc.drpc.testnet.arc.io"): that browser profile blocks the page’s requests to every Arc RPC host, not just one. The page now falls back to reading Arc through the site itself (`/api/rpc`, read-only, Freedit and USDC only; see CLAUDE.md D29). The Remotion prompt commit from another session was taken back out of `main` (file kept, ignored locally).
+- **10-12 Phase 5 done:** you ran the full flow on the live testnet site with your Editor and Client wallets: "everything works great".
+- **10-12 Phase 6 security review** → `docs/SECURITY-REVIEW.md`. Contract tests 38/38 + fork 3/3 again; API attack scripts 20/20 access, 11/11 sign-in, 12/12 relay (new: `web/scripts/security/fork-project.mjs`, `rpc-relay.mjs`); Supabase advisor clean (INFO only); npm audit 0; no secrets in 66 live bundles. Fixed: browser security headers (W-4). Open: **W-1 (medium)** final file not verified server-side before payment (fix proposed, no contract change), W-3 no upload quota. Mainnet dry run passes (≈2.0M gas, ≤ $0.08); the deploy lands at the **same address as testnet** if it is the deployer’s first mainnet tx. Mainnet explorer API blocks command-line clients (Cloudflare 403), so verification goes through **Sourcify** (lists Arc Mainnet).
+- **10-12 Decisions:** custom domain skipped for now; mockup v4 skipped.
 
 ## Next
-0. **YOU: custom domain (SETUP B12c)**, then tell me the domain. Until then MetaMask shows a red warning on the live site.
-1. **YOU: Phase 5, full flow on the live site** (about 20 min): https://freedit-one.vercel.app in two Chrome profiles (Editor, Client), Arc Testnet. Editor: Connect → New project (client = your Client address, price 5, 1 free revision, fee 1) → Upload V1 (a real short MP4 for the preview + any final file, each ≤ 50 MB) → Copy link for your client. Client: Connect → Projects (it's listed) → watch → Request changes (note) → Editor uploads V2 → Client Approve & pay → Download final file. Report anything odd.
-2. Decide on mockup v4 (screens 8–10: role choice, client request link, editor accept). Build it only if approved.
-3. Phase 6: self security review of the contract and API routes (rerun `web/scripts/security/*.mjs` against `npm run dev`), then YOU say "ok to deploy", then YOU run the mainnet deploy (needs mainnet USDC on the deployer, A6–A7). Then set `freedit` + `deployBlock` for mainnet in `web/src/lib/network.ts`, set Vercel `NEXT_PUBLIC_ARC_NETWORK=mainnet`, redeploy.
+1. ~~Phase 5~~ ✓ (10-12). Old text: **YOU: Phase 5, full flow on the live site** (about 20 min): https://freedit-one.vercel.app in two Chrome profiles (Editor, Client), Arc Testnet. Editor: Connect → New project (client = your Client address, price 5, 1 free revision, fee 1) → Upload V1 (a real short MP4 for the preview + any final file, each ≤ 50 MB) → Copy link for your client. Client: Connect → Projects (it's listed) → watch → Request changes (note) → Editor uploads V2 → Client Approve & pay → Download final file. Report anything odd.
+2. ~~Mockup v4~~: skipped (10-12). Custom domain: skipped for now (SETUP B12c when you want it).
+3. **Now: YOU read `docs/SECURITY-REVIEW.md` → "ok to deploy" → send mainnet USDC (A7) → run the mainnet deploy (A10).** Then ME: W-1 fix. Original plan: self security review of the contract and API routes (rerun `web/scripts/security/*.mjs` against `npm run dev`), then YOU say "ok to deploy", then YOU run the mainnet deploy (needs mainnet USDC on the deployer, A6–A7). Then set `freedit` + `deployBlock` for mainnet in `web/src/lib/network.ts`, set Vercel `NEXT_PUBLIC_ARC_NETWORK=mainnet`, redeploy.
 4. Phase 7: live example project on mainnet (A11), linked from the landing page and README.
 5. Phase 8/9: README (promises, how it works, contract links, limits), favicon, demo video (B15/B16), DoraHacks submission (B11). Deadline **Oct 14, 23:59 US Eastern** (target Oct 13).
 
@@ -57,20 +59,21 @@ _Last updated: 2026-10-12. **Phases 1–4 are done.** Contract live and verified
 - Favicon is still Next's default.
 
 ## Blockers
-- Phase 6 needs mainnet USDC (A6). All three wallets have $0 on mainnet. Exchange withdrawals can take hours, so this is the riskiest item for the deadline.
+- Mainnet deploy needs USDC in the deployer (A7). All three wallets had $0.00 on mainnet at 10-12 15:30 UTC; you have USDC in another wallet.
 
 ## YOU: actions pending
 - [ ] YOU: delete the old OneDrive copy `C:\Users\athar\OneDrive\Documents\CLAUDE\ARC\freedit` (stale; the real repo is `C:\Users\athar\Documents\DEV\freedit`)
 - [x] A1–A5 done 10-12 (wallets, keystore `deployer`, faucet). Addresses below.
 - [x] Phase 2 testnet deploy, done 10-12
-- [ ] YOU: A6–A7 (mainnet USDC from India, then split it)
+- [ ] YOU: A7 send mainnet USDC from your other wallet (deployer $1, Editor $1, Client $7)
+- [ ] YOU: read docs/SECURITY-REVIEW.md → "ok to deploy" → A10 mainnet deploy
 - [x] GitHub, Vercel, Supabase done 10-12
 - [ ] YOU: B10 X profile, B11 DoraHacks (check the submission form)
 - [ ] YOU: B15 (demo video files: 3 versions, preview + full, each under 50 MB)
 - [x] Packages OK'd, mockups v3 approved (10-12)
-- [ ] YOU: custom domain (SETUP B12c)
-- [ ] YOU: Phase 5 on the live site (see Next)
-- [ ] YOU: approve or skip mockup v4
+- [ ] YOU (later, optional): custom domain (SETUP B12c)
+- [x] Phase 5 on the live site, done 10-12
+- [x] Mockup v4: skipped 10-12
 
 ## Addresses (public)
 | Role | Address |

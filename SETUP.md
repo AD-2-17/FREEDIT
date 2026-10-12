@@ -79,8 +79,13 @@ Why a keystore instead of a plaintext `.env`: it's encrypted, lives in Ubuntu's 
 
 **Route C: fastest.** A friend who already has USDC on Arc sends $15 to your Client address, and you repay them over UPI.
 
-### A7: Split the mainnet USDC (3 min)
-- [ ] YOU: in the Client wallet on **Arc** mainnet, send **$1.00** to the Editor address and **$2.00** to the deployer address
+### A7: Fund the three wallets on mainnet (3 min)
+From the wallet that already holds USDC **on Arc mainnet** (network "Arc", chain 5042), send USDC to:
+- [ ] YOU: **deployer** `0x1037729af7ccCFFD038005acA26aaa2F5DAA0866`: **$1.00** (the deploy costs ≈ $0.04–0.08)
+- [ ] YOU: **Editor** `0xa8AeBCFB34a669BFF1127D10f97C36C5d992fB8B`: **$1.00** (gas for create + uploads)
+- [ ] YOU: **Client** `0x2C1c06E6Cf809Ce06eDC383dAe97BF15fe5986De`: **$7.00** (live example: $5 price + one $0.50 paid revision + gas)
+- Send nothing **from** the deployer before the deploy: as its first mainnet transaction, Freedit lands at the same address as on testnet.
+- If your USDC is on another network (Base, Ethereum…), stop and tell me: it needs a bridge first (A6 route B).
 - [ ] YOU: check all three balances on https://explorer.arc.io
 
 ### A8: Testnet deploy ✓ done 10-12: `0xC82aB1b65866b43A0F3794ba6d5EAC0a55df4895`, verified
@@ -95,7 +100,13 @@ Why a keystore instead of a plaintext `.env`: it's encrypted, lives in Ubuntu's 
 
 ### A10: Mainnet deploy (Phase 6, 5 min). Needs A7 and your OK on my security review.
 - [ ] YOU: read my security review → reply "ok to deploy"
-- [ ] YOU: run the mainnet deploy command (keystore password) → check verification on https://explorer.arc.io
+- [ ] YOU (Ubuntu terminal; asks for the keystore password):
+  ```bash
+  cd /mnt/c/Users/athar/Documents/DEV/freedit/contracts
+  arc-forge script script/Deploy.s.sol --rpc-url arc_mainnet --account deployer --broadcast --verify --verifier sourcify
+  ```
+  Verification goes to Sourcify because the mainnet explorer API blocks command-line tools (10-12). If only the verify step fails, the contract is still deployed: tell me and I’ll rerun verification (no keys needed).
+- [ ] YOU: paste me the output lines `Freedit:` and the transaction hash (public)
 
 ### A11: Full flow on mainnet = the live example project (Phase 7, 20 min)
 - [ ] YOU: same as A9 with real USDC and small terms: price **$5.00**, 1 free revision, **$0.50** per extra revision
