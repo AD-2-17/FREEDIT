@@ -1,0 +1,27 @@
+# Secrets: never commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Node / Next.js
+node_modules/
+.next/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+
+# Foundry
+contracts/out/
+contracts/cache/
+contracts/dependencies/
+contracts/broadcast/**/dry-run/
+contracts/broadcast/*/31337/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

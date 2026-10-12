@@ -1,0 +1,5 @@
+# One line ending everywhere: the repo is edited from Windows and built from WSL.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.mp4 binary

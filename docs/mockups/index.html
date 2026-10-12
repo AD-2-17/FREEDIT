@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Freedit wireframes</title>
+<style>
+  :root {
+    --bg: #0d0d0e; --panel: #151517; --raised: #1c1c1f; --line: #2a2a2e; --line2: #3a3a40;
+    --text: #e7e7ea; --muted: #8c8c94; --faint: #5c5c64; --accent: #5b8cff; --ok: #3ecf8e; --warn: #f5a524;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #070708; color: var(--text); font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .doc { max-width: 1240px; margin: 0 auto; padding: 24px 16px 80px; }
+  .doc > header h1 { font-size: 18px; margin: 0 0 4px; }
+  .doc > header p { color: var(--muted); margin: 0 0 12px; max-width: 780px; }
+  nav.toc { display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 10px 0 16px; border-bottom: 1px solid var(--line); margin-bottom: 28px; }
+  nav.toc a { color: var(--muted); text-decoration: none; }
+  nav.toc a:hover { color: var(--text); }
+  section.frame { margin-bottom: 48px; }
+  .frame > h2 { font-size: 14px; margin: 0 0 2px; }
+  .frame > .route { color: var(--faint); font-family: ui-monospace, Consolas, monospace; font-size: 12px; margin-bottom: 10px; }
+  .screen { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; overflow-x: auto; }
+  .screen-inner { min-width: 1100px; }
+  .notes { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 10px; color: var(--muted); font-size: 12px; }
+  .notes b { color: var(--text); font-weight: 600; }
+  .notes ul { margin: 4px 0 0; padding-left: 18px; }
+  @media (max-width: 760px) { .notes { grid-template-columns: 1fr; } }
+
+  /* wireframe primitives */
+  .bar { display: flex; align-items: center; justify-content: space-between; height: 44px; padding: 0 16px; border-bottom: 1px solid var(--line); }
+  .logo { font-weight: 700; letter-spacing: -.01em; }
+  .wallet { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line2); border-radius: 4px; padding: 3px 8px; font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+  .avatar { width: 18px; height: 18px; border-radius: 50%; background: #3a3a40; display: inline-block; }
+  .copy { color: var(--faint); font-size: 11px; border: 1px solid var(--line2); border-radius: 3px; padding: 0 4px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; height: 32px; padding: 0 14px; border-radius: 4px; border: 1px solid var(--line2); background: var(--raised); color: var(--text); font-weight: 500; white-space: nowrap; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.lg { height: 40px; padding: 0 18px; font-size: 14px; }
+  .btn.ghost { background: transparent; }
+  .muted { color: var(--muted); } .faint { color: var(--faint); }
+  .mono { font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+  .link { color: var(--accent); text-decoration: none; }
+  .ok { color: var(--ok); } .warn { color: var(--warn); }
+  .box { border: 1px dashed var(--line2); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--faint); }
+  .card { border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+  .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .field { border: 1px solid var(--line2); border-radius: 4px; height: 34px; display: flex; align-items: center; padding: 0 10px; background: var(--raised); }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+  .row { display: flex; align-items: center; gap: 10px; }
+  .between { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .hr { border-top: 1px solid var(--line); }
+  table.list { width: 100%; border-collapse: collapse; }
+  table.list th { text-align: left; font-weight: 500; color: var(--muted); font-size: 12px; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+  table.list td { padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .tabs { display: flex; gap: 18px; border-bottom: 1px solid var(--line); }
+  .tabs span { padding: 8px 0; color: var(--muted); }
+  .tabs span.on { color: var(--text); box-shadow: inset 0 -2px 0 var(--text); }
+  .vswitch { display: inline-flex; border: 1px solid var(--line2); border-radius: 4px; overflow: hidden; }
+  .vswitch span { padding: 3px 10px; color: var(--muted); border-right: 1px solid var(--line2); font-size: 12px; }
+  .vswitch span:last-child { border-right: 0; }
+  .vswitch span.on { color: var(--text); background: var(--raised); }
+  .meter { display: flex; gap: 3px; }
+  .meter i { flex: 1; height: 6px; border-radius: 1px; background: var(--line2); }
+  .meter i.used { background: var(--text); }
+  .kv { display: grid; grid-template-columns: 140px 1fr; gap: 6px 12px; }
+  .kv div:nth-child(odd) { color: var(--muted); }
+  .annot { color: var(--warn); font-size: 11px; font-style: italic; }
+</style>
+</head>
+<body>
+<div class="doc">
+  <header>
+    <h1>Freedit wireframes, for approval</h1>
+    <p>Layout and content only. These aren't final visuals. Dark neutral base, one accent (<span style="color:var(--accent)">blue, placeholder</span>), Geist or Inter in the build. Amber italic text is an annotation, not UI. Names are believable demo data; the live mainnet example will use whatever display names you set.</p>
+    <nav class="toc">
+      <a href="#landing">1 · Landing</a><a href="#dashboard">2 · Dashboard</a><a href="#new">3 · New project</a><a href="#upload">4 · Upload version</a><a href="#review">5 · Client review</a><a href="#pay">5b · Pay sheet</a><a href="#unlock">6 · Unlock</a><a href="#receipt">7 · Public receipt</a>
+    </nav>
+  </header>
+
+  <!-- 1 LANDING -->
+  <section class="frame" id="landing">
+    <h2>1 · Landing</h2><div class="route">/</div>
+    <div class="screen"><div class="screen-inner">
+      <div class="bar"><span class="logo">Freedit</span><span class="row"><span class="muted">Dashboard</span><span class="btn">Connect wallet</span></span></div>
+      <div style="padding:96px 64px 72px; max-width:760px">
+        <div style="font-size:34px; font-weight:700; letter-spacing:-.02em; line-height:1.1">Get paid for every revision.<br>Release the final cut only when it's paid.</div>
+        <p class="muted" style="font-size:15px; margin:16px 0 28px">Freedit lets video editors charge for revisions past the free ones, and keeps the full-quality file locked until the client pays, in USDC on Arc.</p>
+        <div class="row"><span class="btn primary lg">Create a project</span><a class="link" style="margin-left:8px">See a real paid project on Arc mainnet →</a></div>
+      </div>
+      <div class="hr" style="margin:0 64px"></div>
+      <div style="padding:16px 64px 28px" class="between">
+        <span class="muted">Freedit never holds your money: every payment goes straight from the client's wallet to the editor's.</span>
+        <span class="mono faint">Contract 0x7a3e…41c9 <a class="link">↗</a></span>
+      </div>
+    </div></div>
+    <div class="notes">
+      <div><b>What's here:</b> one screen, a headline plus one sentence, one primary action, one proof link to a live mainnet project, and the no-custody line with the contract address. No feature cards, FAQ or testimonials.</div>
+      <div><b>For you to decide:</b> the headline. The brief says "the product name + one sentence". Option A is above (benefit-led). Option B is plainer: <i>"Freedit: paid revisions and pay-to-unlock delivery for video editors."</i></div>
+    </div>
+  </section>
+
+  <!-- 2 DASHBOARD -->
+  <section class="frame" id="dashboard">
+    <h2>2 · Editor dashboard</h2><div class="route">/dashboard</div>
+    <div class="screen"><div class="screen-inner">
+      <div class="bar"><span class="logo">Freedit</span><span class="row"><span class="muted mono">Arc Testnet</span><span class="wallet"><span class="avatar"></span>Kavya Menon · 0x12f4…a9b0 <span class="copy">copy</span></span></span></div>
+      <div style="padding:20px 24px">
+        <div class="between" style="margin-bottom:16px">
+          <div><div style="font-size:18px; font-weight:600">Projects</div><div class="muted">Earned <b style="color:var(--text)">$1,245.00 USDC</b> · 4 projects · 1 awaiting review · 1 revision requested</div></div>
+          <span class="btn primary">New project</span>
+        </div>
+        <div class="tabs" style="margin-bottom:4px"><span class="on">All 4</span><span>Active 2</span><span>Paid 2</span></div>
+        <table class="list">
+          <tr><th>Project</th><th>Client</th><th>Version</th><th>Revisions</th><th>Status</th><th style="text-align:right">Price</th><th style="text-align:right">Earned</th><th>Updated</th><th></th></tr>
+          <tr><td>Diwali launch reel · 45 s</td><td>Bramble &amp; Rye <span class="faint mono">0x9c…71</span></td><td>V3</td><td>3 free + 1 paid</td><td><span class="dot" style="background:var(--accent)"></span>Awaiting review</td><td style="text-align:right">$200.00</td><td style="text-align:right">$15.00</td><td class="muted">12 min ago</td><td><a class="link">↗</a></td></tr>
+          <tr><td>Founder interview cut</td><td>Ledgerline <span class="faint mono">0x44…0e</span></td><td>V2</td><td>1 of 2 free</td><td><span class="dot" style="background:var(--warn)"></span>Revision requested</td><td style="text-align:right">$350.00</td><td style="text-align:right">$0.00</td><td class="muted">2 h ago</td><td><a class="link">↗</a></td></tr>
+          <tr><td>Wedding teaser · Ananya &amp; Dev</td><td>Ananya R. <span class="faint mono">0xb1…d2</span></td><td>V2</td><td>2 of 2 free</td><td><span class="dot" style="background:var(--ok)"></span>Paid</td><td style="text-align:right">$480.00</td><td style="text-align:right">$480.00</td><td class="muted">Oct 9</td><td><a class="link">↗</a></td></tr>
+          <tr><td>Podcast clips × 6</td><td>Quiet Hours Pod <span class="faint mono">0x0f…3a</span></td><td>V1</td><td>0 of 1 free</td><td><span class="dot" style="background:var(--ok)"></span>Paid</td><td style="text-align:right">$750.00</td><td style="text-align:right">$750.00</td><td class="muted">Oct 6</td><td><a class="link">↗</a></td></tr>
+        </table>
+      </div>
+    </div></div>
+    <div class="notes">
+      <div><b>Refs:</b> Linear issue list (dense rows, status as dot + text, underline tabs), Contra invoices (amounts right-aligned). Every row links to the project; ↗ opens the latest tx on the Arc explorer.</div>
+      <div><b>Data source:</b> project ids from the contract (<span class="mono">projectsByEditor</span>), terms and status from <span class="mono">getProject</span>, and titles and client labels from Supabase. "Earned" sums the on-chain Paid and paid-revision events.</div>
+    </div>
+  </section>
+
+  <!-- 3 NEW PROJECT -->
+  <section class="frame" id="new">
+    <h2>3 · New project</h2><div class="route">/new</div>
+    <div class="screen"><div class="screen-inner">
+      <div class="bar"><span class="logo">Freedit</span><span class="wallet"><span class="avatar"></span>Kavya Menon · 0x12f4…a9b0 <span class="copy">copy</span></span></div>
+      <div style="display:grid; grid-template-columns: 1fr 380px; gap:32px; padding:24px">
+        <div style="max-width:560px; display:grid; gap:14px">
+          <div style="font-size:18px; font-weight:600">New project</div>
+          <div><div class="label">Project title</div><div class="field">Diwali launch reel · 45 s</div></div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px">
+            <div><div class="label">Client wallet</div><div class="field mono">0x9c2e…5d71</div></div>
+            <div><div class="label">Client name (shown on the review page)</div><div class="field">Bramble &amp; Rye</div></div>
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px">
+            <div><div class="label">Price</div><div class="field">200.00 <span class="faint" style="margin-left:auto">USDC</span></div></div>
+            <div><div class="label">Free revisions</div><div class="field between"><span>−</span><span>3</span><span>+</span></div></div>
+            <div><div class="label">Fee per extra revision</div><div class="field">15.00 <span class="faint" style="margin-left:auto">USDC</span></div></div>
+          </div>
+          <div class="faint">The client wallet must be different from yours. Terms are fixed once created.</div>
+        </div>
+        <div class="card" style="padding:18px; align-self:start">
+          <div class="label" style="margin-bottom:8px">Summary</div>
+          <div style="font-size:16px; font-weight:600; margin-bottom:12px">Client pays $200.00 · 3 free revisions · $15.00 each after.</div>
+          <div class="kv" style="margin-bottom:16px"><div>Paid to</div><div>You · 0x12f4…a9b0</div><div>Network</div><div>Arc Testnet</div><div>Network fee</div><div>≈ $0.01 USDC</div></div>
+          <span class="btn primary" style="width:100%">Create project</span>
+          <div class="faint" style="margin-top:8px">Recorded on Arc. Freedit never holds funds.</div>
+        </div>
+      </div>
+    </div></div>
+    <div class="notes">
+      <div><b>Refs:</b> Stripe payment-link builder: form on the left, live summary on the right that updates as you type. Amounts are always formatted <span class="mono">$15.00</span>.</div>
+      <div><b>After create:</b> the transaction confirms (sub-second), then you land straight on Upload V1, with a "Copy client link" button.</div>
+    </div>
+  </section>
+
+  <!-- 4 UPLOAD -->
+  <section class="frame" id="upload">
+    <h2>4 · Upload version</h2><div class="route">/p/12/upload</div>
+    <div class="screen"><div class="screen-inner">
+      <div class="bar"><span class="row"><span class="logo">Freedit</span><span class="faint">/</span><span>Diwali launch reel · 45 s</span></span><span class="wallet"><span class="avatar"></span>Kavya Menon · 0x12f4…a9b0 <span class="copy">copy</span></span></div>
+      <div style="padding:24px; display:grid; grid-template-columns: 1fr 1fr; gap:20px">
+        <div style="grid-column: 1 / -1" class="between"><div><div style="font-size:18px; font-weight:600">Upload V3</div><div class="muted">Client asked for changes on V2: "00:12 swap the b-roll · 00:31 music louder"</div></div></div>
+        <div class="card" style="padding:16px">
+          <div class="label">1 · Watermarked preview</div>
+          <div class="muted" style="margin:4px 0 10px">Export with your watermark from Premiere / Resolve / FCP. The client streams this.</div>
+          <div class="box" style="height:120px">preview_v3_watermarked.mp4 · 38.2 MB ✓</div>
+        </div>
+        <div class="card" style="padding:16px">
+          <div class="label">2 · Full-quality file</div>
+          <div class="muted" style="margin:4px 0 10px">Stored privately. Released only after the client pays.</div>
+          <div class="box" style="height:120px">diwali_reel_v3_master.mp4 · 47.9 MB ✓</div>
+        </div>
+        <div class="card" style="padding:16px; grid-column: 1 / -1">
+          <div class="between"><div class="label">Fingerprint (SHA-256, computed in your browser)</div><span class="ok">✓ done</span></div>
+          <div class="mono" style="font-size:14px; margin:8px 0; letter-spacing:.02em">9f2c 41ab 77e0 c3d1 08fa 5be2 91c4 0d7e 6a13 f2b8 44c0 e9a7 5d21 03bf 7c6e e1d0</div>
+          <div class="muted">This fingerprint is recorded on Arc with V3. After paying, the client's browser re-computes it on the downloaded file and must get exactly this value.</div>
+        </div>
+        <div style="grid-column: 1 / -1" class="between">
+          <div class="row muted"><span>① Upload preview ✓</span><span>② Upload full file ✓</span><span>③ Record on Arc</span></div>
+          <span class="btn primary lg">Submit V3</span>
+        </div>
+      </div>
+    </div></div>
+    <div class="notes">
+      <div><b>Notes:</b> the hash is computed in chunks, so big files don't freeze the tab. Uploads go straight from the browser to storage through short-lived signed URLs; the server never sees the full file pass through it.</div>
+      <div><b>Limit:</b> 50 MB per file on the Supabase free plan. The UI says so up front instead of failing later.</div>
+    </div>
+  </section>
+
+  <!-- 5 REVIEW -->
+  <section class="frame" id="review">
+    <h2>5 · Client review page</h2><div class="route">/p/12</div>
+    <div class="screen"><div class="screen-inner">
+      <div class="bar">
+        <span class="row"><span class="logo">Freedit</span><span class="faint">/</span><span>Diwali launch reel · 45 s</span><span class="faint">·</span><span class="row muted"><span class="avatar"></span>Kavya Menon → Bramble &amp; Rye</span></span>
+        <span class="row"><span class="vswitch"><span>V1</span><span>V2</span><span class="on">V3</span></span><span class="wallet">0x9c2e…5d71 <span class="copy">copy</span></span></span>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 340px">
+        <div style="padding:16px; border-right:1px solid var(--line)">
+          <div class="box" style="height:400px; position:relative; background:#0a0a0b">16:9 player
+            <span style="position:absolute; inset:auto 0 45% 0; text-align:center; font-size:28px; color:#ffffff22; letter-spacing:.2em">PREVIEW · KAVYA MENON</span></div>
+          <div style="margin-top:10px; position:relative; height:22px">
+            <div style="position:absolute; top:10px; left:0; right:0; height:3px; background:var(--line2)"></div>
+            <div style="position:absolute; top:10px; left:0; width:38%; height:3px; background:var(--text)"></div>
+            <span style="position:absolute; left:26%; top:5px; width:10px; height:10px; border-radius:50%; background:var(--warn)"></span>
+            <span style="position:absolute; left:68%; top:5px; width:10px; height:10px; border-radius:50%; background:var(--warn)"></span>
+          </div>
+          <div class="between muted mono"><span>00:17 / 00:45</span><span>1080p · watermarked preview</span></div>
+          <div class="hr" style="margin:14px 0"></div>
+          <div class="label" style="margin-bottom:6px">Activity</div>
+          <div class="mono muted" style="display:grid; gap:4px">
+            <div class="between"><span>V3 submitted · fingerprint 9f2c…e1d0</span><span>Oct 13 17:41 <a class="link">tx ↗</a></span></div>
+            <div class="between"><span>Revision 4 requested · $15.00 paid to editor</span><span>Oct 13 11:02 <a class="link">tx ↗</a></span></div>
+            <div class="between"><span>V2 submitted · fingerprint 03ab…77f1</span><span>Oct 12 21:15 <a class="link">tx ↗</a></span></div>
+            <div class="between"><span>Revision 3 requested · free</span><span>Oct 12 16:40 <a class="link">tx ↗</a></span></div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column">
+          <div style="padding:14px 16px" class="between"><b>Comments on V3</b><span class="muted">2</span></div>
+          <div style="padding:0 16px; display:grid; gap:12px; flex:1">
+            <div><div class="row"><span class="mono" style="color:var(--warn)">00:12</span><b>Rohan · Bramble &amp; Rye</b></div><div class="muted">Love the new b-roll. Can the logo hold 1 s longer?</div></div>
+            <div><div class="row"><span class="mono" style="color:var(--warn)">00:31</span><b>Kavya Menon</b></div><div class="muted">Music is +3 dB now, tell me if it's too much.</div></div>
+          </div>
+          <div style="padding:12px 16px"><div class="field muted">Comment at <span class="mono" style="margin-left:4px">00:17</span>…</div></div>
+          <div class="hr"></div>
+          <div style="padding:14px 16px; display:grid; gap:10px">
+            <div class="between"><span class="label">Revisions</span><span>3 of 3 free used · 1 paid</span></div>
+            <div class="meter"><i class="used"></i><i class="used"></i><i class="used"></i></div>
+            <div class="muted">Next revision costs <b style="color:var(--text)">$15.00</b>, paid directly to Kavya.</div>
+            <span class="btn">Request revision · $15.00</span>
+            <span class="btn primary lg">Approve &amp; pay $200.00</span>
+            <div class="faint" style="text-align:center">You approve V3 · fingerprint 9f2c…e1d0</div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <div class="notes">
+      <div><b>Refs:</b> Frame.io and Wipster review links (big player, comments pinned to timecodes and shown as markers on the scrubber, version switcher, one Approve button). The Ziflow-style activity trail links every on-chain action to the explorer.</div>
+      <div><b>States:</b> while free revisions remain, the button reads "Request revision · free (2 left)". When a revision is open: "Changes requested, waiting for V4", with the button disabled. Comments live off-chain; the note hash goes on-chain.</div>
+    </div>
+  </section>
+
+  <!-- 5b PAY SHEET -->
+  <section class="frame" id="pay">
+    <h2>5b · Pay sheet (opens over the review page)</h2><div class="route">/p/12 → Approve &amp; pay</div>
+    <div class="screen"><div class="screen-inner" style="display:flex; justify-content:center; padding:40px 0; background:#09090a">
+      <div class="card" style="width:420px; padding:22px">
+        <div class="muted">Pay Kavya Menon</div>
+        <div style="font-size:30px; font-weight:700; letter-spacing:-.02em; margin:2px 0 14px">$200.00 <span class="muted" style="font-size:14px; font-weight:500">USDC</span></div>
+        <div class="kv" style="margin-bottom:14px">
+          <div>Project</div><div>Diwali launch reel · V3</div>
+          <div>Paid to</div><div class="mono">0x12f4…a9b0</div>
+          <div>Network fee</div><div>≈ $0.01 USDC</div>
+          <div>Freedit fee</div><div>$0.00</div>
+        </div>
+        <div class="hr" style="margin-bottom:14px"></div>
+        <div class="between" style="margin-bottom:14px"><b>Total</b><b>$200.01 USDC</b></div>
+        <div class="muted" style="margin-bottom:8px">Two quick confirmations in your wallet:</div>
+        <div style="display:grid; gap:6px; margin-bottom:14px">
+          <div class="row"><span class="ok">✓</span><span>Allow $200.00 USDC for this payment</span></div>
+          <div class="row"><span class="faint">2</span><span>Pay</span></div>
+        </div>
+        <span class="btn primary lg" style="width:100%">Pay with MetaMask</span>
+        <div style="text-align:center; margin-top:8px"><a class="link">Other wallets</a></div>
+        <div class="faint" style="margin-top:12px; text-align:center">Money goes straight from your wallet to Kavya's. Freedit never holds it.</div>
+      </div>
+    </div></div>
+    <div class="notes">
+      <div><b>Refs:</b> Stripe Checkout and hosted invoice: one total up front with fees included, one main wallet button, "Other wallets" behind it.</div>
+      <div><b>Why two steps:</b> USDC needs an allowance before the contract can move it. If the allowance already covers the amount, step 1 is skipped. Each step settles in under a second on Arc.</div>
+    </div>
+  </section>
+
+  <!-- 6 UNLOCK -->
+  <section class="frame" id="unlock">
+    <h2>6 · Unlock moment (same page, after payment)</h2><div class="route">/p/12, paid</div>
+    <div class="screen"><div class="screen-inner">
+      <div class="bar">
+        <span class="row"><span class="logo">Freedit</span><span class="faint">/</span><span>Diwali launch reel · 45 s</span><span class="faint">·</span><span class="ok">● Paid</span></span>
+        <span class="wallet">0x9c2e…5d71 <span class="copy">copy</span></span>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 340px">
+        <div style="padding:16px; border-right:1px solid var(--line)">
+          <div class="box" style="height:400px; background:#0a0a0b; flex-direction:column; gap:6px">16:9 player, clean
+            <span class="annot">watermark layer fades out over ~600 ms once the Paid event confirms</span></div>
+        </div>
+        <div style="padding:18px 16px; display:grid; gap:14px; align-content:start">
+          <div><div class="ok" style="font-weight:600">Paid $200.00 USDC to Kavya Menon</div><div class="muted">Oct 13, 18:04 · settled in 0.4 s</div></div>
+          <span class="btn primary lg">Download final file · 47.9 MB</span>
+          <div class="card" style="padding:12px">
+            <div class="row"><span class="ok">✓</span><b>File matches the fingerprint on Arc</b></div>
+            <div class="mono muted" style="margin-top:6px">9f2c41ab…5d2103bf7c6ee1d0</div>
+            <div class="annot" style="margin-top:4px">appears after download: "Checking fingerprint… 62%", then ✓ (or ✕ "doesn't match", with what to do)</div>
+          </div>
+          <div class="card" style="padding:12px">
+            <div class="label" style="margin-bottom:8px">Receipt</div>
+            <div class="kv">
+              <div>Amount</div><div>$200.00 USDC</div>
+              <div>Revisions paid</div><div>$15.00 USDC (1)</div>
+              <div>From</div><div class="mono">0x9c2e…5d71</div>
+              <div>To</div><div class="mono">0x12f4…a9b0</div>
+              <div>Version</div><div>V3</div>
+              <div>Transaction</div><div class="mono"><a class="link">0x5e81…c02a ↗</a></div>
+            </div>
+            <div style="margin-top:10px" class="row"><a class="link">Share receipt</a><span class="faint">·</span><a class="link">Copy link</a></div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+    <div class="notes">
+      <div><b>Refs:</b> Gumroad and Lemon Squeezy post-purchase pages: the download is the hero, with the receipt right under it. This is the demo highlight, so the final build gets real motion (watermark fade, button reveal, fingerprint progress) without gimmicks.</div>
+      <div><b>How the download works:</b> you sign a one-time "Sign in with Ethereum" message. The server checks you're the client and that <span class="mono">isPaid()</span> is true on Arc, then returns a link that expires in 60 s.</div>
+    </div>
+  </section>
+
+  <!-- 7 RECEIPT -->
+  <section class="frame" id="receipt">
+    <h2>7 · Public receipt</h2><div class="route">/r/0x5e81…c02a</div>
+    <div class="screen"><div class="screen-inner" style="display:flex; justify-content:center; padding:40px 0">
+      <div style="width:560px">
+        <div class="between" style="margin-bottom:18px"><span class="logo">Freedit</span><span class="muted">Payment receipt</span></div>
+        <div style="font-size:30px; font-weight:700; letter-spacing:-.02em">$200.00 USDC</div>
+        <div class="muted" style="margin-bottom:18px">Paid Oct 13, 2026, 18:04 IST · Arc Mainnet</div>
+        <div class="card" style="padding:16px">
+          <div class="kv">
+            <div>Project</div><div>Diwali launch reel · 45 s (#12)</div>
+            <div>Editor</div><div>Kavya Menon · <span class="mono">0x12f4…a9b0</span></div>
+            <div>Client</div><div>Bramble &amp; Rye · <span class="mono">0x9c2e…5d71</span></div>
+            <div>Approved version</div><div>V3</div>
+            <div>File fingerprint</div><div class="mono">9f2c41ab77e0c3d1…5d2103bf7c6ee1d0</div>
+            <div>Transaction</div><div class="mono"><a class="link">0x5e81…c02a ↗</a></div>
+            <div>Block</div><div class="mono">1,204,883</div>
+          </div>
+        </div>
+        <div class="faint" style="margin-top:12px">Read live from the Freedit contract on Arc. Freedit never held these funds.</div>
+      </div>
+    </div></div>
+    <div class="notes">
+      <div><b>Refs:</b> Stripe hosted receipt. Every field is decoded from the transaction's Paid event on Arc, so it can't be edited. Names come from Supabase and are marked as display names.</div>
+      <div><b>No sign-in needed.</b> Shareable as a link; works for any Paid tx hash.</div>
+    </div>
+  </section>
+</div>
+</body>
+</html>
