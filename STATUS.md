@@ -1,6 +1,6 @@
 # STATUS
 
-_Last updated: 2026-10-12. **Phases 1–3 are done**: contract tested, deployed and verified on Arc Testnet (`0xC82aB1b65866b43A0F3794ba6d5EAC0a55df4895`), and the web app (`web/`) works end to end on a local Arc fork. Next: you try it with your real wallets on testnet (Phase 3 check), then Phase 4 (Supabase + Vercel)._
+_Last updated: 2026-10-12. **Phases 1–4 are done.** Contract live and verified on Arc Testnet (`0xC82aB1b65866b43A0F3794ba6d5EAC0a55df4895`); website live at **https://freedit-one.vercel.app** (testnet) with Supabase storage, sign-in, uploads and verified downloads. Next: Phase 5 (YOU run the full flow on the live site with your real wallets), then the security review and the mainnet deploy, which needs mainnet USDC (still $0)._
 
 ## Done
 - Read and verified the Arc docs: chain IDs, RPCs, USDC address and decimals, 20 gwei floor, zero-address rule, Memo, Arc Foundry install (see CLAUDE.md → Arc facts)
@@ -35,24 +35,43 @@ _Last updated: 2026-10-12. **Phases 1–3 are done**: contract tested, deployed 
 - **10-12 Phase 4 code (Supabase), waiting on keys:** `supabase/schema.sql` (tables, buckets, RLS); server API routes for Sign-In with Ethereum, labels, notes, uploads, downloads (`web/src/server`, `web/src/app/api`); upload page uploads both files with progress; paid page downloads, checks the fingerprint, then saves; notes and titles shared between both sides. Without Supabase keys the app keeps working the Phase 3 way. Checked: tsc, `next build`, 11/11 sign-in attack tests (after fixing a reusable-nonce bug), no server code or keys in browser bundles. `web/.env.local` created (gitignored) with a generated session secret; Supabase lines blank for you.
 
 - **10-12 Supabase project created** through the connector: `freedit`, ref `jqnajstukifkmictupnm`, region ap-south-1 (Mumbai), org "AD-2-17's Org", free plan ($0/month). Schema applied as migration `freedit_initial_schema`: 4 tables (RLS on, no policies), buckets `previews` (public) and `finals` (private), 50 MB each. Security advisor: only the expected INFO "RLS enabled, no policy" (intentional: server-only access). `SUPABASE_URL` written to `web/.env.local`; the service-role key is still blank (YOU).
+- **10-12 Phase 4 tested end to end** (local Arc fork + real Supabase, two test wallets): SIWE sign-in → create project → labels saved → V1 upload (final private + preview public, progress shown) → client change request, note stored server-side → editor on a "fresh device" (no local data) sees the client name and, after signing in, the note → V2 upload → client pays → download = V2 final (not V1), fingerprint matches Arc. Storage: preview public 200, final via public/direct URL 400. Access tests 20/20 (stranger/client/editor, before and after payment) + SIWE attack tests 11/11: scripts in `web/scripts/security/` (run against `npm run dev`). Disconnect signs out. Test data removed afterwards (Supabase back to 0 rows, 0 files). Live site checks: all pages 200, `storage:true`, no test wallets or service key in the bundle.
+- **10-12 Vercel:** https://freedit-one.vercel.app (root `web`, testnet). Auto-deploys on every push to `main`.
 - **10-12 GitHub:** pushed to https://github.com/AD-2-17/FREEDIT (public, branch `main`). Full-history secret scan before pushing: clean. Commits keep your Gmail address (your choice).
 
 ## Next
-1. **YOU: Phase 3 check on testnet with your real wallets** (steps below, about 15 min).
-2. Phase 4: Supabase (preview + final file upload, private download after `isPaid`, titles/notes shared between both sides) + Vercel deploy. Needs B12/B13 accounts.
-3. Phase 5: full flow on testnet with your Editor and Client wallets on the deployed site (A9).
-4. Phase 6: security review → your "ok to deploy" → mainnet deploy (needs A6/A7 mainnet USDC; deployer has $0 on mainnet).
+1. **YOU: Phase 5, full flow on the live site** (about 20 min): https://freedit-one.vercel.app in two Chrome profiles (Editor, Client), Arc Testnet. Editor: Connect → New project (client = your Client address, price 5, 1 free revision, fee 1) → Upload V1 (a real short MP4 for the preview + any final file, each ≤ 50 MB) → Copy link for your client. Client: Connect → Projects (it's listed) → watch → Request changes (note) → Editor uploads V2 → Client Approve & pay → Download final file. Report anything odd.
+2. Decide on mockup v4 (screens 8–10: role choice, client request link, editor accept). Build it only if approved.
+3. Phase 6: self security review of contract + API routes (rerun ), then YOU say "ok to deploy", then YOU run the mainnet deploy (needs mainnet USDC on the deployer, A6–A7). Then set  + deployBlock in , switch Vercel , redeploy.
+4. Phase 7: live example project on mainnet (A11), link it from the landing page and README.
+5. Phase 8/9: README (promises, how it works, contract links, limits), favicon, demo video (B15/B16), DoraHacks submission (B11). Deadline **Oct 14, 23:59 US Eastern** (target Oct 13).
 
-### Phase 3 check (YOU, Windows PowerShell)
-```powershell
-cd C:\Users\athar\Documents\DEV\freedit\web
-npm run dev
-```
-Open http://localhost:3000 in the Chrome profile with the **Freedit Editor** wallet → Launch app → Connect → New project (client = your Client address, price 5, fee 1) → Upload V1 (any small video file; preview link: any https .mp4, e.g. `https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4`). Then open the copied project link in the **Freedit Client** profile → Request changes / Approve & pay. Every wallet prompt is on Arc Testnet (test USDC only).
+## Blockers
+- Phase 6 needs mainnet USDC (A6). Exchange withdrawals can take hours, so this is the riskiest item for the Oct 13 target.
 
-## Known limits (Phase 3, fixed in Phase 4)
-- Files aren't stored yet: the editor pastes a preview link, and "Download final file" is off. The fingerprint check works today.
-- Titles, client names and change-request notes live in the browser that typed them (the other side sees a note fingerprint). Phase 4 moves them to Supabase.
+## YOU: actions pending
+- [ ] YOU: delete the old OneDrive copy `C:\Users\athar\OneDrive\Documents\CLAUDE\ARC\freedit` once you've confirmed the DEV folder opens fine (it was identical on 10-12, and keeping two copies invites edits to the wrong one)
+- [x] A1–A5 done 10-12 (wallets, keystore `deployer`, faucet). Addresses below.
+- [x] Phase 2 testnet deploy, done 10-12
+- [ ] YOU: A6–A7 (mainnet USDC from India, then split it): start today
+- [x] GitHub, Vercel, Supabase done 10-12
+- [ ] YOU: B10 X profile, B11 DoraHacks (check the submission form)
+- [ ] YOU: B15 (demo video files: 3 versions, preview + full, each under 50 MB)
+- [x] Packages OK'd, mockups v3 approved (10-12)
+- [ ] YOU: Phase 5 on the live site (see Next)
+- [ ] YOU: approve or skip mockup v4
+
+## Addresses (public)
+| Role | Address |
+|---|---|
+| deployer | `0x1037729af7ccCFFD038005acA26aaa2F5DAA0866` |
+| Freedit Editor (demo) | `0xa8AeBCFB34a669BFF1127D10f97C36C5d992fB8B` |
+| Freedit Client (demo) | `0x2C1c06E6Cf809Ce06eDC383dAe97BF15fe5986De` |
+
+Checked 10-12 (read-only): checksums valid, all plain wallets (EOAs, so Memo works later), none blocklisted, nonce 0.
+Testnet: $20.00 each (deployer $19.95 after the deploy). Mainnet: $0.00 each (waiting on A6).## Known limits
+- Files up to 50 MB (Supabase free plan). Production path: Cloudflare R2.
+- Supabase free projects pause after a week without activity: open the dashboard to wake it.
 - Favicon is still Next's default.
 
 ## Blockers

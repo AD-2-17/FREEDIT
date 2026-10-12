@@ -76,6 +76,12 @@ Docs MCP: `circle` (`https://api.circle.com/v1/codegen/mcp`, user scope) is conf
 | Arc Testnet (5042002) | [`0xC82aB1b65866b43A0F3794ba6d5EAC0a55df4895`](https://explorer.testnet.arc.io/address/0xC82aB1b65866b43A0F3794ba6d5EAC0a55df4895) | [`0x895f…ae68`](https://explorer.testnet.arc.io/tx/0x895f639f3778c360440e23ad0bd9cbf301e705088c86361f40a693febb8fae68), block 66796009, 10-12, from deployer `0x1037…0866` | ✅ Blockscout |
 | Arc Mainnet (5042) | _not yet_ | | |
 
+| Service | Where | Notes |
+|---|---|---|
+| Live site (Vercel, testnet) | https://freedit-one.vercel.app | Root Directory `web`; env set by the user; auto-deploys on push to `main` |
+| GitHub | https://github.com/AD-2-17/FREEDIT | public, branch `main`; commits use the user's Gmail (their choice) |
+| Supabase | project `freedit`, ref `jqnajstukifkmictupnm`, ap-south-1, free plan | schema = migration `freedit_initial_schema` (= `supabase/schema.sql`); Supabase connector available in Claude sessions |
+
 ## Repo layout
 ```
 CLAUDE.md  STATUS.md  SETUP.md  README.md (Phase 9)
