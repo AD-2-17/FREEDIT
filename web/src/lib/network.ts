@@ -61,8 +61,10 @@ const networks: Record<NetworkName, NetworkConfig> = {
   mainnet: {
     chain: arcMainnetDocs,
     label: "Arc",
-    freedit: undefined, // set after the Phase 6 mainnet deploy
-    deployBlock: 0n,
+    // Deployed 10-13 (tx 0x26693b1d…0c37), verified on Sourcify (exact match). The deployer's second contract:
+    // its first was the one-off Sweep at 0xC82a…4895 that returned $1 sent there by mistake (script/Rescue.s.sol).
+    freedit: "0x470D6950a662868d331aE8e9b60d327C1cF9fA9F",
+    deployBlock: 25726619n,
     activity: "explorer",
     rpcBackups: ["https://rpc.blockdaemon.mainnet.arc.io", "https://rpc.drpc.mainnet.arc.io", "https://rpc.quicknode.mainnet.arc.io"],
   },

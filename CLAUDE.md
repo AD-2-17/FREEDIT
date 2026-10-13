@@ -57,7 +57,7 @@ Docs MCP: `circle` (`https://api.circle.com/v1/codegen/mcp`, user scope) is conf
 | Testnet contract verification: `--verifier blockscout --verifier-url https://explorer.testnet.arc.io/api/` | ✅ used 10-12: "Pass - Verified" after one 15 s retry | deploy-on-arc, our deploy |
 | `eth_getLogs` is capped at **10,000 blocks** per query (testnet and mainnet RPC: "requested range too large"); blocks ≈ 0.5 s | ✅ tested 10-12 | RPC probes |
 | Mainnet verification URL `https://explorer.arc.io/api/` | ⚠️ live Blockscout, but its `/api` answers **every non-browser client** (curl, Foundry UA) with a Cloudflare challenge (403); browsers get 200. Testnet’s API doesn’t. So mainnet verification uses **Sourcify**, which lists Arc Mainnet (5042) and Arc Testnet (supported: true) | probed 10-12 |
-| Mainnet deploy dry run: ≈2.0M gas, est. gas price 40 gwei, ≤ 0.081 USDC; same CREATE address as testnet (`0xC82a…4895`) while the deployer’s mainnet nonce is 0 | ✅ simulated 10-12 | `arc-forge script --sender` |
+| Mainnet deploy: **actual 1,552,079 gas × 20.000001 gwei = $0.0310 USDC** (forge estimated 2.0M × 40 gwei); Sourcify verification `exact_match` after one 15 s retry | ✅ deployed 10-13 | mainnet deploy receipt |
 
 ## Contract design (`contracts/src/Freedit.sol`)
 - Constructor: `Freedit(IERC20 usdc)`. On Arc, pass `0x3600…0000`. Immutable. No owner, admin, upgrade path, `receive()` or withdraw.
@@ -75,7 +75,7 @@ Docs MCP: `circle` (`https://api.circle.com/v1/codegen/mcp`, user scope) is conf
 | Network | Freedit | Deploy tx | Verified |
 |---|---|---|---|
 | Arc Testnet (5042002) | [`0xC82aB1b65866b43A0F3794ba6d5EAC0a55df4895`](https://explorer.testnet.arc.io/address/0xC82aB1b65866b43A0F3794ba6d5EAC0a55df4895) | [`0x895f…ae68`](https://explorer.testnet.arc.io/tx/0x895f639f3778c360440e23ad0bd9cbf301e705088c86361f40a693febb8fae68), block 66796009, 10-12, from deployer `0x1037…0866` | ✅ Blockscout |
-| Arc Mainnet (5042) | _not yet_ | | |
+| Arc Mainnet (5042) | [`0x470D6950a662868d331aE8e9b60d327C1cF9fA9F`](https://explorer.arc.io/address/0x470D6950a662868d331aE8e9b60d327C1cF9fA9F) | [`0x2669…0c37`](https://explorer.arc.io/tx/0x26693b1df44b02d24cad56b0843c10ec494c0a7f7b43bc187d2b90bfc0f10c37), block 25726619, 10-13, deployer nonce 1 | ✅ Sourcify `exact_match` |
 
 | Service | Where | Notes |
 |---|---|---|
@@ -139,6 +139,7 @@ Git runs from Windows only (D2). `.gitattributes` pins LF so WSL and Windows agr
 - **D27 (10-12) Errors name the failing step and keep a short technical detail** (`SignInError` → "Signing in didn't work: …"; RPC failures split into "couldn't reach Arc" vs "your wallet couldn't reach Arc"); the full error goes to the browser console as `[freedit]`.
 - **D28 (10-12) RPC fallback + reads that recover.** Browser and server read through viem `fallback([rpc.<net>.arc.io, Blockdaemon, dRPC(, QuickNode on mainnet)])`, the node providers listed in docs.arc.io connect-to-arc (testnet QuickNode timed out on 10-12, so it’s left out). Reverts don’t fall through. `useReadContracts` turns a failed request into per-call "failure" results (no query error), which made the dashboard show "No projects yet": `failureOf()` now surfaces it, and failing reads retry every 10–15 s instead of stopping. Notices show the cause (`readFailure`: "HTTP 429 from host").
 - **D29 (10-12) Same-origin read relay `/api/rpc`.** The Client profile got "Failed to fetch" from every `*.arc.io` RPC (all providers) while the site and Supabase loaded: the browser blocks the page’s requests to Arc’s RPC hosts. The browser now reads `rpc.<net>.arc.io` first, then `/api/rpc` on its own origin, which forwards to the docs’ providers in order. Allowed: 11 read methods (no `eth_sendRawTransaction`; `eth_getLogs` on the local fork only); `eth_call`/`eth_estimateGas` only to Freedit or USDC, or Multicall3 `aggregate3` whose every inner target is Freedit or USDC (≤ 100 calls); no state overrides; ≤ 20 per batch, ≤ 32 KB; browsers must send `sec-fetch-site: same-origin`. 12 allow/refuse cases tested 10-12. Include in the Phase 6 review (no per-IP rate limit).
+- **D30 (10-13) Mainnet Freedit is the deployer's 2nd contract, at `0x470D…fA9F` (not the testnet address).** $1 was sent by mistake to `0xC82a…4895`, the deployer's nonce-0 CREATE address. Deploying Freedit there would have locked that $1 in it forever (no withdraw), contradicting promise 1. `contracts/script/Rescue.s.sol` created a one-off `Sweep` as the nonce-0 contract (tx `0xe3a5…bd06`, block 25726503), which returned the $1 to the deployer; Freedit followed at nonce 1 with a $0 balance. Rescue refuses unless its contract lands exactly on that address.
 - **D13 (pending) Memo.** It needs no contract change, since CallFrom keeps the client EOA as `msg.sender`. Decide in Phase 5 whether the UI wraps pay/revision calls in `Memo.memo(...)` for EOAs (fallback: direct call).
 
 ## Design rules (strict)

@@ -48,6 +48,6 @@ Checked: Sign-In with Ethereum (domain from the real `Host`, single-use nonce, c
 
 ## Mainnet deploy notes
 
-- The deploy is the deployer's first mainnet transaction (nonce 0), the same as on testnet, so Freedit lands at **the same address as on testnet**, `0xC82aB1b65866b43A0F3794ba6d5EAC0a55df4895`. Send nothing **from** the deployer before the deploy, or the address changes (harmless, but the docs would need updating).
+- **Deployed 2026-10-13: [`0x470D6950a662868d331aE8e9b60d327C1cF9fA9F`](https://explorer.arc.io/address/0x470D6950a662868d331aE8e9b60d327C1cF9fA9F)**, block 25726619, verified on Sourcify (exact match), $0.031 gas. It is the deployer's second contract: $1 had been sent by mistake to the first-contract address `0xC82a…4895`, so a one-off `Sweep` contract (`contracts/script/Rescue.s.sol`) was created there first and returned the $1. Freedit starts with a zero balance.
 - The deployer has no powers in the contract; it only pays deploy gas.
 - After the deploy: record the address and block in `web/src/lib/network.ts` (mainnet), set Vercel `NEXT_PUBLIC_ARC_NETWORK=mainnet`, redeploy, and run `rpc-relay.mjs` against the live site.
