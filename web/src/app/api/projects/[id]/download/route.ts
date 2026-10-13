@@ -1,4 +1,3 @@
-import { chain } from "@/lib/network";
 import { db, FINALS } from "@/server/db";
 import { fail, guard, json } from "@/server/http";
 
@@ -15,7 +14,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   const { data: rows, error } = await db()
     .from("files")
     .select("path, file_name")
-    .eq("chain_id", chain.id)
+    .eq("chain_id", g.net.chain.id)
     .eq("project_id", g.id.toString())
     .eq("kind", "final")
     .eq("sha256", g.project.latestFileHash.toLowerCase())

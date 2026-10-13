@@ -1,5 +1,4 @@
 import { randomBytes } from "node:crypto";
-import { chain } from "@/lib/network";
 import { db, FINALS, MAX_FILE_BYTES, PREVIEWS } from "@/server/db";
 import { cleanText, fail, guard, json, readJson } from "@/server/http";
 
@@ -28,14 +27,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   const version = g.project.version + 1;
   const safe = fileName.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "").slice(-80) || "file";
-  const path = `${chain.id}/${g.id}/v${version}-${randomBytes(6).toString("hex")}-${safe}`;
+  const path = `${g.net.chain.id}/${g.id}/v${version}-${randomBytes(6).toString("hex")}-${safe}`;
   const bucket = kind === "preview" ? PREVIEWS : FINALS;
 
   const signed = await db().storage.from(bucket).createSignedUploadUrl(path);
   if (signed.error || !signed.data) return fail(502, "Couldn't prepare the upload. Try again.");
 
   const { error } = await db().from("files").insert({
-    chain_id: chain.id,
+    chain_id: g.net.chain.id,
     project_id: g.id.toString(),
     version,
     kind,

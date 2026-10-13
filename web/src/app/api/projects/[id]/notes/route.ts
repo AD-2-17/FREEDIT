@@ -1,5 +1,4 @@
 import { keccak256, toBytes } from "viem";
-import { chain } from "@/lib/network";
 import { db } from "@/server/db";
 import { cleanText, fail, guard, json, readJson } from "@/server/http";
 
@@ -10,7 +9,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const { data, error } = await db()
     .from("notes")
     .select("note_hash, body, created_at")
-    .eq("chain_id", chain.id)
+    .eq("chain_id", g.net.chain.id)
     .eq("project_id", g.id.toString())
     .order("created_at", { ascending: true });
   if (error) return fail(502, "Couldn't load notes.");
@@ -27,7 +26,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { error } = await db()
     .from("notes")
     .upsert(
-      { chain_id: chain.id, note_hash: noteHash, project_id: g.id.toString(), body: text, author: g.me.toLowerCase() },
+      { chain_id: g.net.chain.id, note_hash: noteHash, project_id: g.id.toString(), body: text, author: g.me.toLowerCase() },
       { onConflict: "chain_id,note_hash", ignoreDuplicates: true },
     );
   if (error) return fail(502, "Couldn't save the note.");

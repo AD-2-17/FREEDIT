@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { api, useMe } from "./api";
-import { chain } from "./network";
+import { chain, netQuery } from "./network";
 
 /**
  * Off-chain labels (project title, display names) and change-request notes.
@@ -127,8 +127,9 @@ export const useLocalNote = (hash: string | undefined) => useStored<string>(hash
 const clean = (s: string | null) => (s ?? "").replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 80) || undefined;
 const LINK_KEYS = { t: "title", c: "clientName", e: "editorName" } as const;
 
+/** The link also names the Arc network, so the client opens the same project (ids repeat across networks). */
 export function shareLink(origin: string, id: bigint, meta: ProjectMeta): string {
-  const q = new URLSearchParams();
+  const q = new URLSearchParams(netQuery);
   for (const [k, field] of Object.entries(LINK_KEYS)) {
     const v = meta[field];
     if (v) q.set(k, v);

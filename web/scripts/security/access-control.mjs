@@ -18,7 +18,7 @@ async function login(acct) {
   const { nonce } = await r1.json();
   const message = createSiweMessage({ domain: "localhost:3000", address: acct.address, uri: BASE, version: "1", chainId: 5042002, nonce, issuedAt: new Date(), expirationTime: new Date(Date.now() + 600_000) });
   const r2 = await fetch(`${BASE}/api/auth/verify`, { method: "POST", headers: { "content-type": "application/json", cookie: cookieOf(r1, "fd_nonce") }, body: JSON.stringify({ message, signature: await acct.signMessage({ message }) }) });
-  return cookieOf(r2, "fd_session");
+  return cookieOf(r2, "fd_session_5042002");
 }
 
 const call = async (cookie, method, path, body) => {

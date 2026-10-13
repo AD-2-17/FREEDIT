@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ClientOnly } from "@/components/client-only";
 import { ProjectView } from "./project-view";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -8,5 +9,5 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <ProjectView idText={id} />;
+  return <ClientOnly><ProjectView idText={id} /></ClientOnly>;
 }

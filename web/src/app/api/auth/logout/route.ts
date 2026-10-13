@@ -1,8 +1,10 @@
 import { cookies } from "next/headers";
 import { json } from "@/server/http";
-import { SESSION_COOKIE } from "@/server/session";
+import { SESSION_COOKIES } from "@/server/session";
 
 export async function POST() {
-  (await cookies()).delete(SESSION_COOKIE);
+  // Disconnecting signs out on every network.
+  const jar = await cookies();
+  for (const name of SESSION_COOKIES) jar.delete(name);
   return json({ ok: true });
 }

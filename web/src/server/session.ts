@@ -4,12 +4,15 @@ import { db } from "./db";
 import { serverEnv, storageConfigured } from "./env";
 
 /**
- * Tiny signed tokens for two httpOnly cookies:
- *   fd_session  { a: wallet address (lowercase), c: chain id, e: expiry }   7 days, set after Sign-In with Ethereum
- *   fd_nonce    { n: nonce, e: expiry }                                     10 minutes, one sign-in attempt
+ * Tiny signed tokens for httpOnly cookies:
+ *   fd_session_<chainId>  { a: wallet address (lowercase), c: chain id, e: expiry }   7 days, after Sign-In with Ethereum
+ *   fd_nonce              { n: nonce, e: expiry }                                     10 minutes, one sign-in attempt
+ * One session per Arc network, so switching networks never carries a sign-in across (and switching back keeps it).
  * Format: base64url(JSON) + "." + base64url(HMAC-SHA256(SESSION_SECRET, payload)). No database needed.
  */
-export const SESSION_COOKIE = "fd_session";
+export const sessionCookie = (chainId: number) => `fd_session_${chainId}`;
+/** Cookie names this site has used for sessions, cleared together on sign-out. */
+export const SESSION_COOKIES = ["fd_session", sessionCookie(5042), sessionCookie(5042002)];
 export const NONCE_COOKIE = "fd_nonce";
 export const SESSION_TTL = 7 * 24 * 3600;
 export const NONCE_TTL = 10 * 60;

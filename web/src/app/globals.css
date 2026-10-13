@@ -81,6 +81,16 @@ button { font: inherit; color: inherit; }
 .navlink:hover, .navlink.on { color: var(--text); }
 .net { display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 11px; border: 1px solid var(--line); border-radius: 999px; font-size: 12.5px; color: var(--muted); white-space: nowrap; }
 .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--c, var(--muted)); flex: none; display: inline-block; }
+/* Network switch: blue slider, filled on mainnet, outlined on testnet. */
+.netswitch { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 5px 0 11px; border: 1px solid var(--line); border-radius: 999px; font-size: 12.5px; color: var(--text-2); white-space: nowrap; flex: none; }
+.netswitch:hover { border-color: var(--line-strong); color: var(--text); }
+.netswitch:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+.ns-track { position: relative; width: 32px; height: 20px; border-radius: 999px; background: var(--accent-soft); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand) 40%, transparent); transition: background .18s ease, box-shadow .18s ease; }
+.ns-thumb { position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--brand); transition: transform .18s ease, background .18s ease; }
+.netswitch[aria-checked="true"] .ns-track { background: var(--brand); box-shadow: none; }
+.netswitch[aria-checked="true"] .ns-thumb { transform: translateX(12px); background: #fff; }
+@media (prefers-reduced-motion: reduce) { .ns-track, .ns-thumb { transition: none; } }
+@media (max-width: 640px) { .netswitch { padding: 0 4px; gap: 0; } .ns-label { display: none; } }
 .iconbtn { all: unset; cursor: pointer; display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line); color: var(--muted); flex: none; }
 .iconbtn:hover { color: var(--text); background: var(--raised); }
 .iconbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }

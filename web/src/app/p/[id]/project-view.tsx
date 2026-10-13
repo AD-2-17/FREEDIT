@@ -13,7 +13,7 @@ import { dateTime, shortAddress, shortHash, usd } from "@/lib/format";
 import { DownloadFinal } from "@/components/download-final";
 import { useSignIn } from "@/lib/api";
 import { importMetaFromUrl, projectTitle, shareLink, useLocalNote, useNotes, useProjectMeta } from "@/lib/meta";
-import { network } from "@/lib/network";
+import { netQuery, network } from "@/lib/network";
 import {
   earned, freeditAddress, nextRevisionCost, paidRevisions, parseId, statusOf, useProject, useVersions,
   type Project, type Version,
@@ -315,7 +315,7 @@ function PaidPanel({ id, p, role, editorName, paymentTx, paidAt, storage }: { id
         </dl>
         {paymentTx && (
           <div className="row" style={{ marginTop: 12, fontSize: 13 }}>
-            <Link className="link" href={`/r/${paymentTx}`}><Icon name="receipt" size="xs" />Open public receipt</Link>
+            <Link className="link" href={`/r/${paymentTx}${netQuery ? `?${netQuery}` : ""}`}><Icon name="receipt" size="xs" />Open public receipt</Link>
           </div>
         )}
       </div>

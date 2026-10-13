@@ -1,6 +1,7 @@
 import { decodeFunctionData, isHex, multicall3Abi, type Address } from "viem";
-import { chain, network, networkName, rpcUrls, USDC } from "@/lib/network";
+import { USDC, type Net } from "@/lib/network";
 import { json } from "@/server/http";
+import { requestNet } from "@/server/net";
 
 /**
  * Same-origin, read-only relay to Arc's RPC. The browser reads Arc directly and uses this only when it can't
@@ -15,11 +16,10 @@ const MAX_BODY = 32_000;
 const MAX_BATCH = 20;
 const MAX_CALLS = 100;
 
-const targets = new Set([network.freedit, USDC].filter((a): a is Address => !!a).map((a) => a.toLowerCase()));
-const multicall = chain.contracts?.multicall3?.address.toLowerCase();
-
-/** A call to Freedit or USDC, or a Multicall3 aggregate3 whose every inner call is. */
-function allowedCall(tx: unknown): boolean {
+/** A call to this network's Freedit or USDC, or a Multicall3 aggregate3 whose every inner call is. */
+function allowedCall(net: Net, tx: unknown): boolean {
+  const targets = new Set([net.freedit, USDC].filter((a): a is Address => !!a).map((a) => a.toLowerCase()));
+  const multicall = net.chain.contracts?.multicall3?.address.toLowerCase();
   if (!tx || typeof tx !== "object") return false;
   const { to, data, input } = tx as { to?: unknown; data?: unknown; input?: unknown };
   if (typeof to !== "string") return false;
@@ -36,15 +36,15 @@ function allowedCall(tx: unknown): boolean {
   }
 }
 
-function allowed(req: unknown): boolean {
+function allowed(net: Net, req: unknown): boolean {
   if (!req || typeof req !== "object") return false;
   const { method, params } = req as { method?: unknown; params?: unknown };
   if (typeof method !== "string") return false;
   // The local fork has no explorer, so its activity feed reads logs over RPC.
-  if (!READS.has(method) && !(networkName === "local" && method === "eth_getLogs")) return false;
+  if (!READS.has(method) && !(net.name === "local" && method === "eth_getLogs")) return false;
   if (method === "eth_call" || method === "eth_estimateGas") {
     // [tx, block] only: no state overrides.
-    return Array.isArray(params) && params.length <= 2 && allowedCall(params[0]);
+    return Array.isArray(params) && params.length <= 2 && allowedCall(net, params[0]);
   }
   return true;
 }
@@ -67,11 +67,12 @@ export async function POST(req: Request) {
   }
   const items = Array.isArray(parsed) ? parsed : [parsed];
   if (items.length === 0 || items.length > MAX_BATCH) return json(rpcError(null, "Batch too large."), 400);
-  const refused = items.find((r) => !allowed(r));
+  const net = await requestNet();
+  const refused = items.find((r) => !allowed(net, r));
   if (refused) return json(rpcError((refused as { id?: unknown })?.id, "Only Freedit's own reads are relayed."), 400);
 
   // Arc's RPC first, then the docs' other node providers. Upstream JSON (including revert data) passes through.
-  for (const url of rpcUrls) {
+  for (const url of net.rpcUrls) {
     try {
       const res = await fetch(url, {
         method: "POST",
@@ -85,5 +86,5 @@ export async function POST(req: Request) {
       // try the next provider
     }
   }
-  return json(rpcError(null, `Couldn't reach ${network.label}.`), 502);
+  return json(rpcError(null, `Couldn't reach ${net.label}.`), 502);
 }

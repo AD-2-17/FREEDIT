@@ -28,7 +28,7 @@ async function verify(msg, signature, cookie, headers = {}) {
     headers: { "content-type": "application/json", ...(cookie ? { cookie } : {}), ...headers },
     body: JSON.stringify({ message: msg, signature }),
   });
-  return { status: res.status, body: await res.json(), session: cookieOf(res, "fd_session") };
+  return { status: res.status, body: await res.json(), session: cookieOf(res, "fd_session_5042002") };
 }
 
 async function me(cookie) {
@@ -101,7 +101,7 @@ const [, value] = session.split("=");
 const [payload, mac] = value.split(".");
 const forged = JSON.parse(Buffer.from(payload, "base64url").toString());
 forged.a = mallory.address.toLowerCase();
-const tampered = `fd_session=${Buffer.from(JSON.stringify(forged)).toString("base64url")}.${mac}`;
+const tampered = `fd_session_5042002=${Buffer.from(JSON.stringify(forged)).toString("base64url")}.${mac}`;
 check("tampered session cookie is ignored", (await me(tampered)).address === null);
 
 // 10. Expired message

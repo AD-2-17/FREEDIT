@@ -1,13 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { network } from "@/lib/network";
 import { Mark } from "./icon";
+import { NetworkSwitch } from "./network-switch";
 import { ThemeToggle } from "./theme";
 import { WalletButton } from "./wallet";
 
 export type Crumb = { label: ReactNode; href?: string };
 
-/** Top bar for the app pages: logo, breadcrumbs, network, theme switch, wallet. */
+/** Top bar for the app pages: logo, breadcrumbs, network switch, theme switch, wallet. */
 export function AppBar({ crumbs = [], children }: { crumbs?: Crumb[]; children?: ReactNode }) {
   return (
     <header className="appbar">
@@ -22,7 +24,7 @@ export function AppBar({ crumbs = [], children }: { crumbs?: Crumb[]; children?:
       </nav>
       <div className="row g12">
         {children}
-        <span className="net hide-sm"><i className="dot" style={{ ["--c" as string]: "var(--ok)" }} />{network.label}</span>
+        <NetworkSwitch />
         <ThemeToggle />
         <WalletButton />
       </div>

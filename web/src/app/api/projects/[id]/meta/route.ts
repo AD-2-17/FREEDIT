@@ -1,4 +1,3 @@
-import { chain } from "@/lib/network";
 import { db } from "@/server/db";
 import { cleanText, fail, guard, json, readJson } from "@/server/http";
 
@@ -9,7 +8,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const body = await readJson(req);
   if (!body) return fail(400, "Bad request.");
   const row = {
-    chain_id: chain.id,
+    chain_id: g.net.chain.id,
     project_id: g.id.toString(),
     title: cleanText(body.title, 80),
     editor_name: cleanText(body.editorName, 60),

@@ -5,7 +5,7 @@ import { BaseError, UserRejectedRequestError } from "viem";
 import { createSiweMessage } from "viem/siwe";
 import { useConfig, useConnection } from "wagmi";
 import { signMessage } from "wagmi/actions";
-import { chain } from "./network";
+import { chain, NETWORK_HEADER, networkName } from "./network";
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -13,11 +13,11 @@ export class ApiError extends Error {
   }
 }
 
-/** JSON call to our own API routes. Errors carry the server's plain-English message. */
+/** JSON call to our own API routes, for this page's Arc network. Errors carry the server's plain-English message. */
 export async function api<T>(path: string, body?: unknown): Promise<T> {
   const res = await fetch(path, {
     method: body === undefined ? "GET" : "POST",
-    headers: body === undefined ? undefined : { "content-type": "application/json" },
+    headers: { [NETWORK_HEADER]: networkName, ...(body === undefined ? {} : { "content-type": "application/json" }) },
     body: body === undefined ? undefined : JSON.stringify(body),
     credentials: "same-origin",
     cache: "no-store",

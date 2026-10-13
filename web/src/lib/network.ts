@@ -3,13 +3,45 @@ import { arc, arcTestnet } from "viem/chains";
 
 
 /**
- * Which Arc network this build talks to. One network per deployment, set by NEXT_PUBLIC_ARC_NETWORK:
- *   testnet (default) · mainnet · local (an arc-anvil fork of testnet on 127.0.0.1:8545, for development only)
+ * Which Arc network the app talks to.
+ *   NEXT_PUBLIC_ARC_NETWORK sets the build's default: testnet (if unset) · mainnet · local (an arc-anvil fork of
+ *   testnet on 127.0.0.1:8545, for development only).
+ *   On mainnet and testnet builds, visitors can switch between the two with the switch in the top bar: the choice
+ *   lives in the `fd_net` cookie, the page reloads, and every call to this site's API names the network it means
+ *   (NETWORK_HEADER), so the server applies that network's contract, sessions and storage rows.
  */
 export type NetworkName = "testnet" | "mainnet" | "local";
+export type SwitchableNetwork = "mainnet" | "testnet";
 
 const raw = process.env.NEXT_PUBLIC_ARC_NETWORK;
-export const networkName: NetworkName = raw === "mainnet" || raw === "local" ? raw : "testnet";
+export const defaultNetwork: NetworkName = raw === "mainnet" || raw === "local" ? raw : "testnet";
+/** A local-fork build stays on the fork; real builds can switch between Arc mainnet and testnet. */
+export const switchable = defaultNetwork !== "local";
+export const NETWORK_COOKIE = "fd_net";
+export const NETWORK_HEADER = "x-freedit-net";
+export const isSwitchableNetwork = (v: unknown): v is SwitchableNetwork => v === "mainnet" || v === "testnet";
+
+/** Remember a network choice in this browser for a year. */
+export function rememberNetwork(name: SwitchableNetwork) {
+  const secure = window.location.protocol === "https:" ? "; secure" : "";
+  document.cookie = `${NETWORK_COOKIE}=${name}; path=/; max-age=31536000; samesite=lax${secure}`;
+}
+
+/** The visitor's choice in the browser; the build default on the server (server code uses `netFor` per request). */
+function chosenNetwork(): NetworkName {
+  if (!switchable || typeof document === "undefined") return defaultNetwork;
+  // A shared link names its network (?net=testnet): follow it, and keep it for the next pages.
+  const fromUrl = new URLSearchParams(window.location.search).get("net");
+  if (isSwitchableNetwork(fromUrl)) {
+    rememberNetwork(fromUrl);
+    return fromUrl;
+  }
+  const v = document.cookie.match(/(?:^|;\s*)fd_net=([a-z]+)/)?.[1];
+  return isSwitchableNetwork(v) ? v : defaultNetwork;
+}
+export const networkName: NetworkName = chosenNetwork();
+/** Query string that pins a shared link to this page's network ("" on a local build). */
+export const netQuery = switchable ? `net=${networkName}` : "";
 
 // viem ships Arc definitions, but its testnet entry points at *.arc.network / arcscan.app.
 // We use the hostnames from docs.arc.io (connect-to-arc), which we verified on 10-12.
@@ -78,10 +110,17 @@ const networks: Record<NetworkName, NetworkConfig> = {
   },
 };
 
+/** Main RPC first (also what a wallet gets when it adds the network), then the backups. */
+export const rpcUrlsOf = (n: NetworkConfig) => [n.chain.rpcUrls.default.http[0], ...n.rpcBackups];
+
+/** One network's settings, for server code that serves whichever network a request names. */
+export type Net = NetworkConfig & { name: NetworkName; rpcUrls: string[] };
+export const netFor = (name: NetworkName): Net => ({ ...networks[name], name, rpcUrls: rpcUrlsOf(networks[name]) });
+
+/** Browser code: the network this page load uses. (Server code must not rely on these; see `netFor`.) */
 export const network = networks[networkName];
 export const chain = network.chain;
-/** Main RPC first (also what a wallet gets when it adds the network), then the backups. */
-export const rpcUrls = [chain.rpcUrls.default.http[0], ...network.rpcBackups];
+export const rpcUrls = rpcUrlsOf(network);
 
 /** USDC's ERC-20 interface on Arc: same address on both networks, 6 decimals (docs: contract-addresses). */
 export const USDC: Address = "0x3600000000000000000000000000000000000000";

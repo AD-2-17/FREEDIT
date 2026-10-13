@@ -1,7 +1,7 @@
-import { chain } from "@/lib/network";
 import { db } from "@/server/db";
 import { storageConfigured } from "@/server/env";
 import { fail, json } from "@/server/http";
+import { requestNet } from "@/server/net";
 
 /** Public labels (title, names) for up to 50 projects: GET /api/meta?ids=1,2,3 */
 export async function GET(req: Request) {
@@ -12,7 +12,7 @@ export async function GET(req: Request) {
   const { data, error } = await db()
     .from("project_meta")
     .select("project_id, title, editor_name, client_name")
-    .eq("chain_id", chain.id)
+    .eq("chain_id", (await requestNet()).chain.id)
     .in("project_id", ids);
   if (error) return fail(502, "Couldn't load project labels.");
   const meta: Record<string, { title?: string; editorName?: string; clientName?: string }> = {};
