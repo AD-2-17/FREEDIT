@@ -45,6 +45,7 @@ _Last updated: 2026-10-12. **Phases 1–5 are done; Phase 6 review is written** 
 - **10-12 Phase 5 done:** you ran the full flow on the live testnet site with your Editor and Client wallets: "everything works great".
 - **10-12 Phase 6 security review** → `docs/SECURITY-REVIEW.md`. Contract tests 38/38 + fork 3/3 again; API attack scripts 20/20 access, 11/11 sign-in, 12/12 relay (new: `web/scripts/security/fork-project.mjs`, `rpc-relay.mjs`); Supabase advisor clean (INFO only); npm audit 0; no secrets in 66 live bundles. Fixed: browser security headers (W-4). Open: **W-1 (medium)** final file not verified server-side before payment (fix proposed, no contract change), W-3 no upload quota. Mainnet dry run passes (≈2.0M gas, ≤ $0.08); the deploy lands at the **same address as testnet** if it is the deployer’s first mainnet tx. Mainnet explorer API blocks command-line clients (Cloudflare 403), so verification goes through **Sourcify** (lists Arc Mainnet).
 - **10-12 Decisions:** custom domain skipped for now; mockup v4 skipped.
+- **10-13 YOU: "ok to deploy"** on the Phase 6 review. Order: fund the deployer first (the deploy is paid from it), run the deploy, then fund Editor and Client for the live example.
 
 ## Next
 1. ~~Phase 5~~ ✓ (10-12). Old text: **YOU: Phase 5, full flow on the live site** (about 20 min): https://freedit-one.vercel.app in two Chrome profiles (Editor, Client), Arc Testnet. Editor: Connect → New project (client = your Client address, price 5, 1 free revision, fee 1) → Upload V1 (a real short MP4 for the preview + any final file, each ≤ 50 MB) → Copy link for your client. Client: Connect → Projects (it's listed) → watch → Request changes (note) → Editor uploads V2 → Client Approve & pay → Download final file. Report anything odd.
@@ -66,7 +67,8 @@ _Last updated: 2026-10-12. **Phases 1–5 are done; Phase 6 review is written** 
 - [x] A1–A5 done 10-12 (wallets, keystore `deployer`, faucet). Addresses below.
 - [x] Phase 2 testnet deploy, done 10-12
 - [ ] YOU: A7 send mainnet USDC from your other wallet (deployer $1, Editor $1, Client $7)
-- [ ] YOU: read docs/SECURITY-REVIEW.md → "ok to deploy" → A10 mainnet deploy
+- [x] "ok to deploy" given 10-13
+- [ ] YOU: fund the deployer ($1 on Arc mainnet), then A10 mainnet deploy
 - [x] GitHub, Vercel, Supabase done 10-12
 - [ ] YOU: B10 X profile, B11 DoraHacks (check the submission form)
 - [ ] YOU: B15 (demo video files: 3 versions, preview + full, each under 50 MB)
